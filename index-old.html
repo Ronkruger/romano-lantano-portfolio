@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Romano Lantano - Web Developer | Portfolio</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Fira+Code:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+    
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <header class="hero-section">
+        <div class="header-top container">
+            <a href="./resume/Lantano_Romano_resume.pdf" target="_blank" class="cv-btn" data-aos="fade-right" data-aos-delay="200">Download CV</a>
+            <div class="hamburger-menu">
+                <i class="fas fa-bars" onclick="toggleMenu()"></i>
+            </div>
+            <nav id="nav-menu">
+                <span class="close-btn" onclick="toggleMenu()">&times;</span>
+                <ul>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#skills">Skills</a></li>
+                    <li><a href="#services">Services</a></li>
+                    <li><a href="#projects">Projects</a></li>
+                    <li><a href="#testimonials">Testimonials</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+
+        <div class="header-content container">
+            <div class="hero-text" data-aos="fade-up" data-aos-delay="400">
+                <h1>Hi! I'm <span class="highlight-name">Romano Lantano</span></h1>
+                <p class="tagline">Crafting <span class="typing-effect">Beautiful Digital Experiences</span></p>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section id="about" class="section-padding">
+            <div class="container">
+                <div class="section-title-wrapper">
+                    <h2 class="section-title" data-aos="fade-up">About Me</h2>
+                </div>
+                <div class="about-content" data-aos="fade-up" data-aos-delay="200">
+                    <img src="images/profile.png" alt="Romano Lantano" class="profile-pic">
+                    <div class="about-text">
+                        <p>I'm a passionate web developer specializing in building responsive and dynamic websites. With expertise in HTML, CSS, JavaScript, and PHP, I create seamless user experiences that bring ideas to life. Whether it's front-end design or back-end functionality, I strive for clean, efficient, and innovative solutions.</p>
+                        <p>Let's build something amazing together! 🚀</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="skills" class="section-padding section-alt-bg">
+            <div class="container">
+                <div class="section-title-wrapper">
+                    <h2 class="section-title" data-aos="fade-up">Skills</h2>
+                </div>
+                <div class="skills-grid" data-aos="fade-up" data-aos-delay="200">
+                    <div class="skill-card" data-aos="zoom-in" data-aos-delay="300">
+                        <i class="fab fa-html5"></i>
+                        <p>HTML</p>
+                    </div>
+                    <div class="skill-card" data-aos="zoom-in" data-aos-delay="400">
+                        <i class="fab fa-css3-alt"></i>
+                        <p>CSS</p>
+                    </div>
+                    <div class="skill-card" data-aos="zoom-in" data-aos-delay="500">
+                        <i class="fab fa-js-square"></i>
+                        <p>JavaScript</p>
+                    </div>
+                    <div class="skill-card" data-aos="zoom-in" data-aos-delay="600">
+                        <i class="fab fa-php"></i>
+                        <p>PHP</p>
+                    </div>
+                    <div class="skill-card" data-aos="zoom-in" data-aos-delay="700">
+                        <i class="fas fa-database"></i>
+                        <p>MySQL</p>
+                    </div>
+                    <div class="skill-card" data-aos="zoom-in" data-aos-delay="800"><i class="fab fa-react"></i><p>React.js</p></div>
+                    <div class="skill-card" data-aos="zoom-in" data-aos-delay="900"><i class="fab fa-node-js"></i><p>Node.js</p></div>
+                    <div class="skill-card" data-aos="zoom-in" data-aos-delay="1000"><i class="fab fa-git-alt"></i><p>Git</p></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="services" class="section-padding">
+            <div class="container">
+                <div class="section-title-wrapper">
+                    <h2 class="section-title" data-aos="fade-up">Services</h2>
+                </div>
+                <div class="services-grid" data-aos="fade-up" data-aos-delay="200">
+                    <div class="service-card" data-aos="flip-left" data-aos-delay="300">
+                        <div class="icon-wrapper">
+                            <i class="fas fa-laptop-code"></i>
+                        </div>
+                        <h3>Frontend Development</h3>
+                        <p>I build responsive and user-friendly interfaces using modern web technologies to ensure a seamless user experience.</p>
+                        <div class="tech-stack-icons">
+                            <i class="fab fa-html5" title="HTML"></i>
+                            <i class="fab fa-css3-alt" title="CSS"></i>
+                            <i class="fab fa-js" title="JavaScript"></i>
+                            <i class="fab fa-react" title="React.js"></i>
+                            <i class="fab fa-bootstrap" title="Bootstrap"></i>
+                        </div>
+                    </div>
+                    <div class="service-card" data-aos="flip-right" data-aos-delay="400">
+                        <div class="icon-wrapper">
+                            <i class="fas fa-server"></i>
+                        </div>
+                        <h3>Backend Development</h3>
+                        <p>Developing secure, efficient, and scalable server-side applications and robust database solutions.</p>
+                        <div class="tech-stack-icons">
+                            <i class="fab fa-php" title="PHP"></i>
+                            <i class="fas fa-database" title="MySQL"></i>
+                            <i class="fas fa-leaf" title="MongoDB"></i>
+                            <i class="fab fa-node-js" title="Node.js"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="projects" class="section-padding section-alt-bg">
+            <div class="container">
+                <div class="section-title-wrapper">
+                    <h2 class="section-title" data-aos="fade-up">Projects</h2>
+                </div>
+                <div class="projects-grid">
+                    <div class="project-card" data-aos="fade-up" data-aos-delay="100">
+                        <img src="./images/background-color-picker.png" alt="Background Color Picker">
+                        <div class="card-content">
+                            <h3>Background Color Picker</h3>
+                            <p>An intuitive tool to select and visualize color codes for web design backgrounds.</p>
+                            <p class="tech-used">Technologies: HTML, CSS, JavaScript</p>
+                            <div class="card-buttons">
+                                <a href="https://github.com/Ronkruger/background-color-picker" target="_blank" class="btn btn-primary">Source Code</a>
+                                <a href="https://dainty-cassata-231695.netlify.app/" target="_blank" class="btn btn-secondary">Live Demo</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-card" data-aos="fade-up" data-aos-delay="200">
+                        <img src="./images/tip_calculator.png" alt="Tip Calculator">
+                        <div class="card-content">
+                            <h3>Tip Calculator</h3>
+                            <p>A simple and efficient application to compute tip amounts and split bills easily.</p>
+                            <p class="tech-used">Technologies: HTML, CSS</p>
+                            <div class="card-buttons">
+                                <a href="https://github.com/Ronkruger/tip-calculator-for-business" target="_blank" class="btn btn-primary">Source Code</a>
+                                <a href="https://stellar-belekoy-0d4dde.netlify.app/" target="_blank" class="btn btn-secondary">Live Demo</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-card" data-aos="fade-up" data-aos-delay="300">
+                        <img src="./images/yt2mp3.png" alt="YouTube to MP3 Converter">
+                        <div class="card-content">
+                            <h3>YouTube to MP3</h3>
+                            <p>A fast and reliable tool to convert YouTube videos into MP3 audio format.</p>
+                            <p class="tech-used">Technologies: HTML, CSS, Vite</p>
+                            <div class="card-buttons">
+                                <a href="https://github.com/Ronkruger/yt2mp3" target="_blank" class="btn btn-primary">Source Code</a>
+                                <a href="https://fanciful-choux-59513a.netlify.app/?fbclid=IwY2xjawHsZBVleHRuA2FlcQIxMAABHaGboEt4IcXkMMjbhNzRCPAwhVYxXS-NMn5BSY9UT_oaF09G3d6EW77RQw_aem_Ew78kp8TJZf0sx6UkwsgVA" target="_blank" class="btn btn-secondary">Live Demo</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-card" data-aos="fade-up" data-aos-delay="400">
+                        <img src="./images/hotel.png" alt="Hotel Website">
+                        <div class="card-content">
+                            <h3>Hotel Website</h3>
+                            <p>A comprehensive hotel reservation platform with user registration and email confirmation features.</p>
+                            <p class="tech-used">Technologies: HTML, CSS, JavaScript, PHP, MySQL</p>
+                            <div class="card-buttons">
+                                <a href="https://github.com/Ronkruger/hotel-website-w-email-registration" target="_blank" class="btn btn-primary">Source Code</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-card" data-aos="fade-up" data-aos-delay="500">
+                        <img src="./images/proshop.png" alt="Online Shop MERN Stack">
+                        <div class="card-content">
+                            <h3>Online Shop MERN Stack</h3>
+                            <p>Your go-to online shop for gadgets – easy browse, secure checkout, and fast delivery right to your door.</p>
+                            <p class="tech-used">Technologies: React Js, NodeJS</p>
+                            <div class="card-buttons">
+                                <a href="https://github.com/Ronkruger/shop-v2" target="_blank" class="btn btn-primary">Source Code</a>
+                                <a href="https://proshop-3rqi.onrender.com/" target="_blank" class="btn btn-secondary">Live Demo</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="testimonials" class="section-padding">
+            <div class="container">
+                <div class="section-title-wrapper">
+                    <h2 class="section-title" data-aos="fade-up">Testimonials</h2>
+                </div>
+                <div class="testimonials-overview" data-aos="fade-up" data-aos-delay="200">
+                    <strong>Total Reviews: 2 (96.5%)</strong>
+                    <div class="overall-stars">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i> (4.9/5)
+                    </div>
+                </div>
+                
+                <div class="testimonials-grid" data-aos="fade-up" data-aos-delay="300">
+                    <div class="testimonial-card" data-aos="zoom-in" data-aos-delay="400">
+                        <p class="testimonial-text">"He is easy to communicate."</p>
+                        <p><strong>- Rh****d Ro****e</strong></p>
+                        <div class="testimonial-stars">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <p class="rating-value">4.7/5 (93%)</p>
+                    </div>
+                    <div class="testimonial-card" data-aos="zoom-in" data-aos-delay="500">
+                        <p class="testimonial-text">"Approachable and quick to address client concerns, plus the pricing is just right."</p>
+                        <p><strong>- R***n S***n</strong></p>
+                        <div class="testimonial-stars">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                        </div>
+                        <p class="rating-value">5/5 (100%)</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="contact" class="section-padding section-alt-bg">
+            <div class="container">
+                <div class="section-title-wrapper">
+                    <h2 class="section-title" data-aos="fade-up">Contact Me</h2>
+                </div>
+                <form id="contact-form" action="https://getform.io/f/bdrnyndb" method="POST" enctype="multipart/form-data" data-aos="fade-up" data-aos-delay="200">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="name" required>
+                    
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                    
+                    <label for="file">Insert File (Optional):</label>
+                    <input type="file" id="file" name="file">
+                    
+                    <label for="message">Message:</label>
+                    <textarea id="message" name="message" required></textarea>
+                    
+                    <button type="submit" class="btn btn-primary">Send Message</button>
+                    <p id="form-message" class="hidden-message">Thank you for your message! I'll get back to you soon.</p>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container footer-content">
+            <p>&copy; 2025 Romano Lantano. All rights reserved.</p>
+            <ul class="social-links">
+                <li><a href="https://www.linkedin.com/in/romano-lantano-418870234/" target="_blank" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a></li>
+                <li><a href="https://github.com/Ronkruger" target="_blank" title="GitHub"><i class="fa-brands fa-github"></i></a></li>
+                <li><a href="https://www.facebook.com/R2sl1/" target="_blank" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a></li>
+            </ul>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+</body>
+</html>
