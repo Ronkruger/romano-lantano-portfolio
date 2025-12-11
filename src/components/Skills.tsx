@@ -9,6 +9,7 @@ const skills = [
   { icon: 'fab fa-react', name: 'React.js', level: 87 },
   { icon: 'fab fa-node-js', name: 'Node.js', level: 82 },
   { icon: 'fab fa-git-alt', name: 'Git', level: 90 },
+  { icon: 'custom-odoo', name: 'Odoo', level: 75 },
 ];
 
 const Skills: React.FC = () => {
@@ -43,7 +44,13 @@ const Skills: React.FC = () => {
               {/* Background pattern */}
               <div className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-gradient-radial from-highlight-green/5 to-transparent rotate-45 transition-transform duration-500 group-hover:rotate-[225deg]"></div>
               
-              <i className={`${skill.icon} text-6xl text-highlight-green mb-2.5 relative z-10 transition-transform duration-300 ${hoveredSkill === skill.name ? 'scale-110 rotate-12' : ''}`}></i>
+              {skill.icon === 'custom-odoo' ? (
+                <div className="text-6xl font-bold text-highlight-green mb-2.5 relative z-10 transition-transform duration-300" style={{ fontFamily: 'Arial, sans-serif', letterSpacing: '2px' }}>
+                  OD
+                </div>
+              ) : (
+                <i className={`${skill.icon} text-6xl text-highlight-green mb-2.5 relative z-10 transition-transform duration-300 ${hoveredSkill === skill.name ? 'scale-110 rotate-12' : ''}`}></i>
+              )}
               <p className="text-lg text-text-light font-medium relative z-10 mb-2">{skill.name}</p>
               
               {/* Progress bar */}
