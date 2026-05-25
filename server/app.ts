@@ -8,6 +8,7 @@ import { requireAdmin } from './middleware/auth.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { authRouter } from './routes/auth.js';
 import { adminProjectsRouter, projectsRouter } from './routes/projects.js';
+import { adminSettingsRouter, settingsRouter } from './routes/settings.js';
 import { uploadsRouter } from './routes/uploads.js';
 
 export const createApp = () => {
@@ -66,7 +67,9 @@ export const createApp = () => {
 
   app.use('/api/auth', authRouter);
   app.use('/api/projects', projectsRouter);
+  app.use('/api/settings', settingsRouter);
   app.use('/api/admin/projects', adminProjectsRouter);
+  app.use('/api/admin/settings', adminSettingsRouter);
   app.use('/api/admin/uploads', uploadsRouter);
   app.use('/api', (_request, response) => {
     response.status(404).json({ message: 'API route not found.' });

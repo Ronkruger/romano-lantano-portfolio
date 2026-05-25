@@ -11,6 +11,7 @@ import {
 } from '../api/admin';
 import type { PublicProject } from '../api/projects';
 import ProjectForm from '../components/admin/ProjectForm';
+import SiteSettingsPanel from '../components/admin/SiteSettingsPanel';
 
 const emptyProject = (sortOrder: number): ProjectFormValues => ({
   slug: '',
@@ -323,6 +324,7 @@ const AdminProjectsPage = () => {
         )}
 
         <SystemStatusPanel />
+        <SiteSettingsPanel />
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[0.36fr_0.64fr] lg:items-start">
           <aside className="rounded-lg border border-white/10 bg-surface-raised/75 p-5 shadow-editorial">

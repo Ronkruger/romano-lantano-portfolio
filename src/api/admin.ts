@@ -129,3 +129,42 @@ export const uploadProjectImage = async (file: File) => {
     body: formData,
   });
 };
+
+
+// Site Settings
+export interface SiteSettingsValues {
+  name: string;
+  title: string;
+  location: string;
+  email: string;
+  intro: string;
+  resumeUrl?: string | null;
+  resumePublicId?: string | null;
+  githubUrl: string;
+  linkedinUrl: string;
+  facebookUrl: string;
+  updatedAt?: string;
+}
+
+export const fetchAdminSettings = async () => {
+  const data = await requestJson<{ settings: SiteSettingsValues }>('/api/admin/settings');
+  return data.settings;
+};
+
+export const updateAdminSettings = async (values: Omit<SiteSettingsValues, 'resumeUrl' | 'resumePublicId' | 'updatedAt'>) => {
+  const data = await requestJson<{ settings: SiteSettingsValues }>('/api/admin/settings', {
+    method: 'PUT',
+    body: JSON.stringify(values),
+  });
+  return data.settings;
+};
+
+export const uploadResume = async (file: File) => {
+  const formData = new FormData();
+  formData.append('resume', file);
+
+  return requestJson<{ settings: SiteSettingsValues; resumeUrl: string }>('/api/admin/settings/resume', {
+    method: 'POST',
+    body: formData,
+  });
+};

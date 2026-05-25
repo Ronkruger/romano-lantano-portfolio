@@ -34,3 +34,18 @@ model Project {
 
   @@index([sortOrder, createdAt])
 }
+
+model SiteSettings {
+  id        String   @id @default("singleton")
+  name      String   @default("Romano Lantano")
+  title     String   @default("Full-stack web developer")
+  location  String   @default("Philippines")
+  email     String   @default("romanolantano.dev@gmail.com")
+  intro     String   @default("")
+  resumeUrl String?
+  resumePublicId String?
+  githubUrl String   @default("https://github.com/Ronkruger")
+  linkedinUrl String @default("https://www.linkedin.com/in/romano-lantano-418870234/")
+  facebookUrl String @default("https://www.facebook.com/R2sl1/")
+  updatedAt DateTime @updatedAt
+}
