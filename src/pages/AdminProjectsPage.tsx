@@ -59,85 +59,142 @@ const projectToFormValues = (project: PublicProject): ProjectFormValues => ({
   featured: project.featured ?? true,
 });
 
-interface HealthStatus {
-  api: 'ok' | 'error' | 'checking';
-  database: 'ok' | 'error' | 'checking';
-  latency: number | null;
+interface SystemStatus {
+  database: { status: string; latency?: number };
+  cloudinary: { configured: boolean; cloudName: string | null; folder: string | null };
+  auth: { jwtConfigured: boolean; adminUsername: string; passwordHashSet: boolean; cookieSecure: boolean };
+  environment: { nodeEnv: string; port: number; uptime: number; nodeVersion: string; memoryUsage: number };
 }
 
-const HealthCheck = () => {
-  const [health, setHealth] = useState<HealthStatus>({ api: 'checking', database: 'checking', latency: null });
-  const [lastChecked, setLastChecked] = useState<string>('');
+const formatUptime = (seconds: number) => {
+  const days = Math.floor(seconds / 86400);
+  const hours = Math.floor((seconds % 86400) / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  if (days > 0) return `${days}d ${hours}h ${mins}m`;
+  if (hours > 0) return `${hours}h ${mins}m`;
+  return `${mins}m`;
+};
 
-  const checkHealth = useCallback(async () => {
-    setHealth({ api: 'checking', database: 'checking', latency: null });
-    const start = performance.now();
+const StatusBadge = ({ ok, label }: { ok: boolean; label: string }) => (
+  <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${ok ? 'bg-highlight-green/10 text-highlight-green' : 'bg-red-400/10 text-red-300'}`}>
+    <span className={`inline-block h-2 w-2 rounded-full ${ok ? 'bg-highlight-green' : 'bg-red-400'}`} />
+    {label}
+  </span>
+);
 
+const SystemStatusPanel = () => {
+  const [status, setStatus] = useState<SystemStatus | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const fetchStatus = useCallback(async () => {
+    setLoading(true);
+    setError('');
     try {
-      const response = await fetch('/api/health', { credentials: 'include' });
-      const latency = Math.round(performance.now() - start);
-
-      if (response.ok) {
-        setHealth({ api: 'ok', database: 'ok', latency });
-      } else {
-        setHealth({ api: 'ok', database: 'error', latency });
-      }
+      const response = await fetch('/api/admin/status', { credentials: 'include' });
+      if (!response.ok) throw new Error('Failed to fetch status');
+      const data = await response.json() as SystemStatus;
+      setStatus(data);
     } catch {
-      setHealth({ api: 'error', database: 'error', latency: null });
+      setError('Unable to fetch system status.');
+    } finally {
+      setLoading(false);
     }
-
-    setLastChecked(new Date().toLocaleTimeString());
   }, []);
 
   useEffect(() => {
-    checkHealth();
-    const interval = setInterval(checkHealth, 60_000);
+    fetchStatus();
+    const interval = setInterval(fetchStatus, 60_000);
     return () => clearInterval(interval);
-  }, [checkHealth]);
+  }, [fetchStatus]);
 
-  const statusDot = (status: 'ok' | 'error' | 'checking') => {
-    if (status === 'checking') return 'bg-yellow-400 animate-pulse';
-    if (status === 'ok') return 'bg-highlight-green';
-    return 'bg-red-400';
-  };
+  if (loading && !status) {
+    return (
+      <div className="mt-8 rounded-lg border border-white/10 bg-surface-raised/75 p-6 shadow-editorial">
+        <div className="animate-pulse space-y-4">
+          <div className="h-5 w-40 rounded bg-white/10" />
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            {[1, 2, 3, 4].map((i) => <div key={i} className="h-24 rounded-lg bg-white/5" />)}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  const statusLabel = (status: 'ok' | 'error' | 'checking') => {
-    if (status === 'checking') return 'Checking...';
-    if (status === 'ok') return 'Healthy';
-    return 'Unreachable';
-  };
+  if (error) {
+    return (
+      <div className="mt-8 rounded-lg border border-red-400/20 bg-red-950/20 p-5">
+        <p className="text-sm text-red-200">{error}</p>
+      </div>
+    );
+  }
+
+  if (!status) return null;
 
   return (
-    <div className="mt-5 rounded-lg border border-white/10 bg-surface-raised/75 p-4 shadow-editorial">
+    <section className="mt-8 rounded-lg border border-white/10 bg-surface-raised/75 p-6 shadow-editorial">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Activity size={16} className="text-accent-primary" aria-hidden="true" />
-          <h2 className="text-sm font-semibold text-text-light">System Health</h2>
+          <Activity size={18} className="text-accent-primary" aria-hidden="true" />
+          <h2 className="text-lg font-semibold text-text-light">System Status</h2>
         </div>
         <button
-          onClick={checkHealth}
+          onClick={fetchStatus}
           className="rounded-md border border-white/10 px-3 py-1.5 text-xs font-semibold text-text-muted transition hover:border-accent-primary/60 hover:text-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/70"
         >
           Refresh
         </button>
       </div>
-      <div className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <div className="flex items-center gap-2">
-          <span className={`inline-block h-2.5 w-2.5 rounded-full ${statusDot(health.api)}`} />
-          <span className="text-xs text-text-muted">API: <span className="text-text-light">{statusLabel(health.api)}</span></span>
+
+      <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Database */}
+        <div className="rounded-lg border border-white/10 bg-dark-bg/60 p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">Database</p>
+          <div className="mt-2">
+            <StatusBadge ok={status.database.status === 'connected'} label={status.database.status === 'connected' ? 'Connected' : 'Unreachable'} />
+          </div>
+          {status.database.latency !== undefined && (
+            <p className="mt-2 text-xs text-text-muted">Latency: <span className="text-text-light">{status.database.latency}ms</span></p>
+          )}
         </div>
-        <div className="flex items-center gap-2">
-          <span className={`inline-block h-2.5 w-2.5 rounded-full ${statusDot(health.database)}`} />
-          <span className="text-xs text-text-muted">Database: <span className="text-text-light">{statusLabel(health.database)}</span></span>
+
+        {/* Cloudinary */}
+        <div className="rounded-lg border border-white/10 bg-dark-bg/60 p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">Cloudinary</p>
+          <div className="mt-2">
+            <StatusBadge ok={status.cloudinary.configured} label={status.cloudinary.configured ? 'Configured' : 'Not configured'} />
+          </div>
+          {status.cloudinary.cloudName && (
+            <p className="mt-2 text-xs text-text-muted">Cloud: <span className="text-text-light">{status.cloudinary.cloudName}</span></p>
+          )}
+          {status.cloudinary.folder && (
+            <p className="mt-1 text-xs text-text-muted">Folder: <span className="text-text-light">{status.cloudinary.folder}</span></p>
+          )}
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-text-muted">Latency: <span className="text-text-light">{health.latency !== null ? `${health.latency}ms` : '—'}</span></span>
+
+        {/* Auth */}
+        <div className="rounded-lg border border-white/10 bg-dark-bg/60 p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">Authentication</p>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            <StatusBadge ok={status.auth.jwtConfigured} label={status.auth.jwtConfigured ? 'JWT OK' : 'JWT missing'} />
+            <StatusBadge ok={status.auth.passwordHashSet} label={status.auth.passwordHashSet ? 'Hash set' : 'No hash'} />
+          </div>
+          <p className="mt-2 text-xs text-text-muted">User: <span className="text-text-light">{status.auth.adminUsername}</span></p>
+          <p className="mt-1 text-xs text-text-muted">Secure cookie: <span className="text-text-light">{status.auth.cookieSecure ? 'Yes' : 'No'}</span></p>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-text-muted">Checked: <span className="text-text-light">{lastChecked || '—'}</span></span>
+
+        {/* Environment */}
+        <div className="rounded-lg border border-white/10 bg-dark-bg/60 p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">Environment</p>
+          <div className="mt-2">
+            <StatusBadge ok={status.environment.nodeEnv === 'production'} label={status.environment.nodeEnv} />
+          </div>
+          <p className="mt-2 text-xs text-text-muted">Uptime: <span className="text-text-light">{formatUptime(status.environment.uptime)}</span></p>
+          <p className="mt-1 text-xs text-text-muted">Node: <span className="text-text-light">{status.environment.nodeVersion}</span></p>
+          <p className="mt-1 text-xs text-text-muted">Memory: <span className="text-text-light">{status.environment.memoryUsage} MB</span></p>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 
@@ -265,7 +322,7 @@ const AdminProjectsPage = () => {
           </div>
         )}
 
-        <HealthCheck />
+        <SystemStatusPanel />
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[0.36fr_0.64fr] lg:items-start">
           <aside className="rounded-lg border border-white/10 bg-surface-raised/75 p-5 shadow-editorial">
