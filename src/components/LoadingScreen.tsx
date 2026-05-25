@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import { Code2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const LoadingScreen: React.FC<{ onLoadingComplete: () => void }> = ({ onLoadingComplete }) => {
+const LoadingScreen = ({ onLoadingComplete }: { onLoadingComplete: () => void }) => {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
@@ -25,7 +26,10 @@ const LoadingScreen: React.FC<{ onLoadingComplete: () => void }> = ({ onLoadingC
         initial={{ opacity: 1 }}
         exit={{ opacity: 0, scale: 1.1 }}
         transition={{ duration: 0.5 }}
-        className="fixed inset-0 z-[10000] bg-dark-bg flex items-center justify-center"
+        className="fixed inset-0 z-[10000] flex items-center justify-center bg-dark-bg"
+        role="status"
+        aria-label="Loading Romano Lantano portfolio"
+        aria-live="polite"
       >
         <div className="text-center">
           <motion.div
@@ -38,15 +42,15 @@ const LoadingScreen: React.FC<{ onLoadingComplete: () => void }> = ({ onLoadingC
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                className="absolute inset-0 border-4 border-transparent border-t-accent-primary border-r-highlight-blue rounded-full"
+                className="absolute inset-0 rounded-full border border-transparent border-r-highlight-blue border-t-accent-primary"
               ></motion.div>
               <motion.div
                 animate={{ rotate: -360 }}
                 transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-                className="absolute inset-4 border-4 border-transparent border-t-highlight-green border-r-link-hover rounded-full"
+                className="absolute inset-4 rounded-full border border-transparent border-r-link-hover border-t-highlight-blue"
               ></motion.div>
               <div className="absolute inset-0 flex items-center justify-center">
-                <i className="fas fa-code text-4xl text-highlight-blue"></i>
+                <Code2 className="text-highlight-blue" size={40} aria-hidden="true" />
               </div>
             </div>
           </motion.div>
@@ -55,7 +59,7 @@ const LoadingScreen: React.FC<{ onLoadingComplete: () => void }> = ({ onLoadingC
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-3xl font-bold text-highlight-blue mb-4"
+            className="mb-4 text-3xl font-semibold text-text-light"
           >
             Romano Lantano
           </motion.h2>
@@ -66,11 +70,11 @@ const LoadingScreen: React.FC<{ onLoadingComplete: () => void }> = ({ onLoadingC
             transition={{ delay: 0.4 }}
             className="w-64 mx-auto"
           >
-            <div className="h-2 bg-dark-bg-alt rounded-full overflow-hidden">
+            <div className="h-2 overflow-hidden rounded-full bg-dark-bg-alt">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${progress}%` }}
-                className="h-full bg-gradient-to-r from-accent-primary via-highlight-blue to-highlight-green"
+                className="h-full bg-gradient-to-r from-accent-primary via-highlight-blue to-link-hover"
               ></motion.div>
             </div>
             <p className="text-text-muted mt-2 text-sm">{progress}%</p>
@@ -82,7 +86,7 @@ const LoadingScreen: React.FC<{ onLoadingComplete: () => void }> = ({ onLoadingC
             transition={{ delay: 0.6 }}
             className="text-text-muted mt-4 text-sm"
           >
-            Loading amazing experiences...
+            Preparing the experience
           </motion.p>
         </div>
       </motion.div>

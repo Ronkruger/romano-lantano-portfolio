@@ -1,153 +1,207 @@
-import React, { useState } from 'react';
+import { Mail, MapPin, Paperclip, Send } from 'lucide-react';
+import { type FormEvent, useState } from 'react';
+import Section from './ui/Section';
+import { profile, socialLinks } from '../data/portfolio';
 
-const Contact: React.FC = () => {
-  const [showMessage, setShowMessage] = useState(false);
-  const [messageText, setMessageText] = useState('');
-  const [messageType, setMessageType] = useState<'success' | 'error'>('success');
-  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
-  const [focusedField, setFocusedField] = useState<string | null>(null);
+type SubmitStatus = 'idle' | 'submitting' | 'success' | 'error';
+
+const initialFormData = {
+  name: '',
+  email: '',
+  message: '',
+};
+
+const Contact = () => {
+  const [formData, setFormData] = useState(initialFormData);
   const [charCount, setCharCount] = useState(0);
+  const [status, setStatus] = useState<SubmitStatus>('idle');
+  const [statusMessage, setStatusMessage] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    
-    const form = e.currentTarget;
-    const formData = new FormData(form);
+  const isSubmitting = status === 'submitting';
+  const fieldClass = 'w-full rounded-md border border-white/10 bg-dark-bg-alt px-4 py-3 text-text-light outline-none transition placeholder:text-text-muted/60 focus:border-accent-primary/70 focus:ring-2 focus:ring-accent-primary/30';
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const form = event.currentTarget;
+    const requestBody = new FormData(form);
     const actionUrl = form.getAttribute('action') || '';
+
+    setStatus('submitting');
+    setStatusMessage('Sending your message...');
 
     try {
       const response = await fetch(actionUrl, {
         method: 'POST',
-        body: formData,
+        body: requestBody,
         headers: {
-          'Accept': 'application/json'
-        }
+          Accept: 'application/json',
+        },
       });
 
-      const result = await response.json();
+      const result = (await response.json().catch(() => ({}))) as { message?: string };
 
-      if (response.ok) {
-        setMessageText('Thank you for your message! I\'ll get back to you soon.');
-        setMessageType('success');
-        form.reset();
-      } else {
-        setMessageText(result.message || 'Oops! There was an error sending your message. Please try again later.');
-        setMessageType('error');
+      if (!response.ok) {
+        throw new Error(result.message || 'Message submission failed.');
       }
-    } catch (error) {
-      setMessageText('Network error. Please check your internet connection and try again.');
-      setMessageType('error');
-    } finally {
-      setShowMessage(true);
-      setTimeout(() => {
-        setShowMessage(false);
-      }, 7000);
+
+      setStatus('success');
+      setStatusMessage("Thank you for your message. I'll get back to you soon.");
+      setFormData(initialFormData);
+      setCharCount(0);
+      // form.reset() is redundant — controlled state already resets the fields
+    } catch {
+      setStatus('error');
+      setStatusMessage('There was a problem sending your message. Please try again or email me directly.');
     }
   };
 
   return (
-    <section id="contact" className="py-20 bg-dark-bg-alt relative overflow-hidden">
-      <div className="w-[90%] max-w-7xl mx-auto px-5 relative z-10">
-        <div className="relative inline-block mx-auto text-center pb-5 w-full">
-          <h2 
-            className="text-5xl md:text-6xl mb-10 relative text-highlight-blue text-center shadow-[0_0_10px_rgba(0,188,212,0.4)] font-bold uppercase tracking-wider"
-            data-aos="fade-up"
-          >
-            Contact Me
-          </h2>
-        </div>
-        
-        <form 
+    <Section
+      id="contact"
+      eyebrow="Contact"
+      title="Tell me what you want to build."
+      description="Share the project context, the deadline, or even the rough idea. I will help turn it into a clear next step."
+      muted
+    >
+      <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr]">
+        <aside className="rounded-lg border border-white/10 bg-surface-raised/70 p-6 shadow-editorial">
+          <div className="flex h-12 w-12 items-center justify-center rounded-md bg-accent-primary/10 text-accent-primary">
+            <Mail size={22} aria-hidden="true" />
+          </div>
+          <h3 className="mt-6 text-2xl font-semibold text-text-light">Direct contact</h3>
+          <p className="mt-3 text-sm leading-7 text-text-muted">
+            Prefer not to use the form? Send an email directly or connect through the links below.
+          </p>
+
+          <div className="mt-6 space-y-3 text-sm text-text-muted">
+            <a className="flex items-center gap-3 transition hover:text-accent-primary" href={`mailto:${profile.email}`}>
+              <Mail size={17} aria-hidden="true" />
+              {profile.email}
+            </a>
+            <span className="flex items-center gap-3">
+              <MapPin size={17} aria-hidden="true" />
+              {profile.location}
+            </span>
+          </div>
+
+          <div className="mt-8 flex flex-wrap gap-3">
+            {socialLinks.slice(0, 3).map((social) => {
+              const Icon = social.icon;
+              return (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={social.label}
+                  className="grid min-h-11 min-w-11 place-items-center rounded-md border border-white/10 text-text-muted transition hover:border-accent-primary/60 hover:text-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/70"
+                >
+                  <Icon size={18} aria-hidden="true" />
+                </a>
+              );
+            })}
+          </div>
+        </aside>
+
+        <form
           onSubmit={handleSubmit}
-          action="https://getform.io/f/bdrnyndb" 
-          method="POST" 
+          action="https://getform.io/f/bdrnyndb"
+          method="POST"
           encType="multipart/form-data"
-          className="flex flex-col max-w-2xl mx-auto bg-dark-bg p-10 rounded-xl shadow-[0_4px_15px_rgba(0,0,0,0.3)] border border-accent-secondary relative overflow-hidden"
-          data-aos="fade-up" 
-          data-aos-delay="200"
+          className="rounded-lg border border-white/10 bg-surface-raised/70 p-6 shadow-editorial md:p-8"
         >
-          {/* Background gradient */}
-          <div className="absolute -top-2.5 -left-2.5 -right-2.5 -bottom-2.5 bg-gradient-to-br from-accent-primary/5 to-highlight-blue/5 -z-0 pointer-events-none rounded-2xl"></div>
-          
-          <label htmlFor="name" className="mb-2 font-medium text-text-light text-lg relative z-10 transition-colors duration-200" style={{ color: focusedField === 'name' ? '#00bcd4' : '' }}>Name:</label>
-          <input 
-            type="text" 
-            id="name" 
-            name="name" 
-            required
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            onFocus={() => setFocusedField('name')}
-            onBlur={() => setFocusedField(null)}
-            className="w-full p-3 mb-5 border border-accent-secondary rounded bg-dark-bg-alt text-text-light font-primary outline-none transition-all duration-300 relative z-10 focus:border-highlight-blue focus:shadow-[0_0_8px_rgba(0,188,212,0.4)] focus:scale-[1.02]"
-          />
-          
-          <label htmlFor="email" className="mb-2 font-medium text-text-light text-lg relative z-10 transition-colors duration-200" style={{ color: focusedField === 'email' ? '#00bcd4' : '' }}>Email:</label>
-          <input 
-            type="email" 
-            id="email" 
-            name="email" 
-            required
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            onFocus={() => setFocusedField('email')}
-            onBlur={() => setFocusedField(null)}
-            className="w-full p-3 mb-5 border border-accent-secondary rounded bg-dark-bg-alt text-text-light font-primary outline-none transition-all duration-300 relative z-10 focus:border-highlight-blue focus:shadow-[0_0_8px_rgba(0,188,212,0.4)] focus:scale-[1.02]"
-          />
-          
-          <label htmlFor="file" className="mb-2 font-medium text-text-light text-lg relative z-10">Insert File (Optional):</label>
-          <input 
-            type="file" 
-            id="file" 
-            name="file"
-            className="w-full p-2.5 mb-5 border border-dashed border-accent-secondary rounded bg-dark-bg-alt text-text-muted relative z-10"
-          />
-          
-          <div className="relative">
-            <label htmlFor="message" className="mb-2 font-medium text-text-light text-lg relative z-10 transition-colors duration-200 flex justify-between" style={{ color: focusedField === 'message' ? '#00bcd4' : '' }}>
-              <span>Message:</span>
-              <span className="text-sm text-text-muted">{charCount}/500</span>
+          <div className="grid gap-5 md:grid-cols-2">
+            <div>
+              <label htmlFor="name" className="mb-2 block text-sm font-semibold text-text-light">Name</label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                required
+                autoComplete="name"
+                value={formData.name}
+                onChange={(event) => setFormData({ ...formData, name: event.target.value })}
+                className={fieldClass}
+                placeholder="Your name"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="email" className="mb-2 block text-sm font-semibold text-text-light">Email</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                required
+                autoComplete="email"
+                value={formData.email}
+                onChange={(event) => setFormData({ ...formData, email: event.target.value })}
+                className={fieldClass}
+                placeholder="you@example.com"
+              />
+            </div>
+          </div>
+
+          <div className="mt-5">
+            <label htmlFor="file" className="mb-2 flex items-center gap-2 text-sm font-semibold text-text-light">
+              <Paperclip size={16} aria-hidden="true" />
+              Attachment optional
             </label>
-            <textarea 
-              id="message" 
-              name="message" 
+            <input
+              type="file"
+              id="file"
+              name="file"
+              className="w-full rounded-md border border-dashed border-white/15 bg-dark-bg-alt px-4 py-3 text-sm text-text-muted file:mr-4 file:rounded-md file:border-0 file:bg-accent-primary file:px-3 file:py-2 file:text-sm file:font-semibold file:text-dark-bg focus:outline-none focus:ring-2 focus:ring-accent-primary/30"
+            />
+          </div>
+
+          <div className="mt-5">
+            <label htmlFor="message" className="mb-2 flex justify-between gap-4 text-sm font-semibold text-text-light">
+              <span>Message</span>
+              <span id="message-count" className="font-normal text-text-muted">{charCount}/500</span>
+            </label>
+            <textarea
+              id="message"
+              name="message"
               required
               maxLength={500}
               value={formData.message}
-              onChange={(e) => {
-                setFormData({ ...formData, message: e.target.value });
-                setCharCount(e.target.value.length);
+              aria-describedby="message-count"
+              onChange={(event) => {
+                setFormData({ ...formData, message: event.target.value });
+                setCharCount(event.target.value.length);
               }}
-              onFocus={() => setFocusedField('message')}
-              onBlur={() => setFocusedField(null)}
-              className="w-full p-3 mb-5 border border-accent-secondary rounded bg-dark-bg-alt text-text-light font-primary outline-none transition-all duration-300 min-h-[120px] resize-y relative z-10 focus:border-highlight-blue focus:shadow-[0_0_8px_rgba(0,188,212,0.4)] focus:scale-[1.02]"
-            ></textarea>
+              className={`${fieldClass} min-h-[150px] resize-y`}
+              placeholder="A short project brief, timeline, or question..."
+            />
           </div>
-          
-          <button 
+
+          <button
             type="submit"
-            className="inline-block px-6 py-3 rounded-md no-underline font-semibold text-sm my-2.5 mr-4 transition-all duration-300 border-2 uppercase tracking-wide relative overflow-hidden z-10 bg-accent-primary text-white border-accent-primary shadow-[0_0_8px_rgba(233,69,96,0.4)] hover:bg-transparent hover:text-accent-primary hover:shadow-[0_0_20px_rgba(233,69,96,0.8)] hover:-translate-y-0.5 hover:scale-105 active:scale-95"
+            disabled={isSubmitting}
+            className="mt-6 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-accent-primary px-5 py-3 text-sm font-semibold text-dark-bg transition hover:-translate-y-0.5 hover:bg-link-hover focus:outline-none focus:ring-2 focus:ring-accent-primary/70 disabled:cursor-not-allowed disabled:opacity-60 md:w-auto"
           >
-            <span className="flex items-center gap-2">
-              <i className="fas fa-paper-plane"></i>
-              Send Message
-            </span>
+            <Send size={18} aria-hidden="true" />
+            {isSubmitting ? 'Sending...' : 'Send message'}
           </button>
-          
-          {showMessage && (
-            <p 
-              className={`mt-5 p-4 rounded border text-center font-medium relative z-10 ${
-                messageType === 'success' 
-                  ? 'bg-highlight-green/20 border-highlight-green text-highlight-green' 
-                  : 'bg-accent-primary/20 border-accent-primary text-accent-primary'
-              }`}
-            >
-              {messageText}
-            </p>
-          )}
+
+          <p
+            className={`mt-5 rounded-md border p-4 text-sm ${
+              status === 'success'
+                ? 'border-highlight-green/40 bg-highlight-green/10 text-highlight-green'
+                : status === 'error'
+                  ? 'border-accent-primary/40 bg-accent-primary/10 text-accent-primary'
+                  : 'border-transparent text-text-muted'
+            }`}
+            role="status"
+            aria-live="polite"
+          >
+            {statusMessage || 'I usually respond after reviewing the project details.'}
+          </p>
         </form>
       </div>
-    </section>
+    </Section>
   );
 };
 

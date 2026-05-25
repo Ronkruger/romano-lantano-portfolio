@@ -1,96 +1,138 @@
-import React, { useState, useEffect } from 'react';
+import { FileText, Menu, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { navItems, profile } from '../data/portfolio';
 
-const Header: React.FC = () => {
+const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [scrollY, setScrollY] = useState(0);
-  
+  const location = useLocation();
+
   useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const toggleMenu = () => {
-    setMenuOpen(!menuOpen);
-  };
-
-  const closeMenu = () => {
     setMenuOpen(false);
+  }, [location.pathname, location.hash]);
+
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setMenuOpen(false);
+      }
+    };
+
+    document.body.style.overflow = menuOpen ? 'hidden' : '';
+    window.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleEscape);
+    };
+  }, [menuOpen]);
+
+  const isActive = (href: string) => {
+    if (href === '/') {
+      return location.pathname === '/';
+    }
+
+    return location.pathname === '/' && location.hash === href.replace('/', '');
   };
 
   return (
-    <>
-      {/* Fixed Navigation Bar */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-dark-bg/95 backdrop-blur-sm shadow-lg">
-        <div className="w-[90%] max-w-7xl mx-auto flex justify-between items-center p-5">
-          <a 
-            href="./resume/Lantano_Romano_resume.pdf" 
-            target="_blank" 
-            className="inline-block px-5 py-2.5 bg-accent-primary text-white no-underline border-2 border-accent-primary rounded-md font-semibold transition-all duration-300 hover:bg-transparent hover:text-accent-primary hover:shadow-[0_0_15px_rgba(233,69,96,0.6)]"
-          >
-            Download CV
-          </a>
+    <header className="fixed left-0 right-0 top-0 z-50 border-b border-white/10 bg-dark-bg/80 backdrop-blur-xl">
+      <div className="mx-auto flex w-[90%] max-w-7xl items-center justify-between px-5 py-4">
+        <Link to="/" className="group flex min-h-11 items-center gap-3 focus:outline-none focus:ring-2 focus:ring-accent-primary/70">
+          <span className="grid h-10 w-10 place-items-center rounded-md border border-accent-primary/40 bg-accent-primary/10 text-sm font-bold text-accent-primary transition group-hover:bg-accent-primary group-hover:text-dark-bg">
+            RL
+          </span>
+          <span className="hidden leading-tight sm:block">
+            <span className="block text-sm font-semibold text-text-light">{profile.name}</span>
+            <span className="block text-xs text-text-muted">Web developer</span>
+          </span>
+        </Link>
 
-          {/* Hamburger Menu */}
-          <div 
-            className="relative z-[1001] cursor-pointer text-highlight-blue text-3xl"
-            onClick={toggleMenu}
-          >
-            <i className="fas fa-bars p-2 rounded border-2 border-highlight-blue transition-all duration-300 hover:bg-highlight-blue hover:text-dark-bg"></i>
-          </div>
-
-          {/* Navigation Menu */}
-          <nav 
-            className={`fixed top-0 ${menuOpen ? 'right-0' : '-right-[300px]'} w-[300px] h-screen bg-black/95 p-8 transition-all duration-400 z-[1000] shadow-[-5px_0_20px_rgba(0,0,0,0.5)] flex flex-col items-center`}
-          >
-            <span 
-              className="absolute top-5 right-5 text-4xl text-accent-primary cursor-pointer font-bold transition-colors duration-300 hover:text-highlight-blue"
-              onClick={closeMenu}
+        <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary navigation">
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              to={item.href}
+              className={`rounded-md px-3 py-2 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-accent-primary/70 ${
+                isActive(item.href)
+                  ? 'bg-white/[0.06] text-accent-primary'
+                  : 'text-text-muted hover:bg-white/[0.04] hover:text-text-light'
+              }`}
             >
-              &times;
-            </span>
+              {item.label}
+            </Link>
+          ))}
+        </nav>
 
-            <ul className="list-none p-0 mt-20 text-center w-full">
-              {['About', 'Skills', 'Services', 'Projects', 'Timeline', 'Testimonials', 'Contact'].map((item) => (
-                <li key={item} className="py-4 border-b border-white/10 last:border-b-0">
-                  <a 
-                    href={`#${item.toLowerCase()}`} 
-                    className="no-underline text-text-light text-xl block transition-all duration-300 font-medium hover:text-highlight-blue hover:shadow-[0_0_10px_rgba(0,188,212,0.5)]"
-                    onClick={closeMenu}
-                  >
-                    {item}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
+        <div className="hidden items-center gap-3 lg:flex">
+          <a
+            href={profile.resumeUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-11 items-center gap-2 rounded-md border border-white/15 px-4 py-2 text-sm font-semibold text-text-light transition hover:border-accent-primary/70 hover:text-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/70"
+          >
+            <FileText size={17} aria-hidden="true" />
+            CV
+          </a>
         </div>
+
+        <button
+          type="button"
+          className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border border-white/15 text-text-light transition hover:border-accent-primary/70 hover:text-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/70 lg:hidden"
+          aria-expanded={menuOpen}
+          aria-controls="mobile-navigation"
+          aria-label="Open navigation menu"
+          onClick={() => setMenuOpen(true)}
+        >
+          <Menu size={22} aria-hidden="true" />
+        </button>
       </div>
 
-      {/* Hero Section */}
-      <header className="relative bg-gradient-to-br from-accent-secondary to-dark-bg text-text-light pt-32 pb-32 text-center overflow-hidden min-h-screen flex flex-col items-center justify-center">
-        {/* Background patterns */}
-        <div className="absolute inset-0 opacity-50">
-          <div className="absolute w-full h-full bg-gradient-radial from-highlight-blue/5 to-transparent" style={{ backgroundImage: 'radial-gradient(circle at 10% 20%, rgba(0, 188, 212, 0.05) 0%, transparent 80%)' }}></div>
-          <div className="absolute w-full h-full" style={{ backgroundImage: 'radial-gradient(circle at 90% 80%, rgba(233, 69, 96, 0.05) 0%, transparent 80%)' }}></div>
-        </div>
+      {menuOpen && (
+        <>
+          <button className="fixed inset-0 -z-10 bg-black/60 lg:hidden" aria-label="Close navigation menu" aria-hidden="true" tabIndex={-1} onClick={() => setMenuOpen(false)} />
 
-        {/* Hero Content */}
-        <div 
-          className="relative z-10 flex flex-col items-center justify-center h-full pt-16"
-          style={{ transform: `translateY(${scrollY * 0.5}px)`, opacity: 1 - scrollY / 500 }}
-        >
-          <div className="text-center" data-aos="fade-up" data-aos-delay="400">
-            <h1 className="text-6xl md:text-7xl lg:text-8xl mb-2.5 shadow-[0_0_20px_rgba(0,188,212,0.5)] leading-tight font-bold">
-              Hi! I'm <span className="text-accent-primary">Romano Lantano</span>
-            </h1>
-            <p className="text-2xl md:text-3xl mt-4 italic text-text-muted font-code">
-              Crafting Beautiful Digital Experiences
-            </p>
-          </div>
-        </div>
-      </header>
-    </>
+          <aside
+            id="mobile-navigation"
+            className="fixed right-0 top-0 h-screen w-[min(88vw,360px)] border-l border-white/10 bg-dark-bg p-6 shadow-editorial transition-transform duration-300 lg:hidden"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold text-text-light">Navigation</span>
+              <button
+                type="button"
+                className="grid min-h-11 min-w-11 place-items-center rounded-md border border-white/15 text-text-light transition hover:border-accent-primary/70 hover:text-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/70"
+                aria-label="Close navigation menu"
+                onClick={() => setMenuOpen(false)}
+              >
+                <X size={22} aria-hidden="true" />
+              </button>
+            </div>
+
+            <nav className="mt-10 grid gap-2" aria-label="Mobile navigation">
+              {navItems.map((item) => (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  className="rounded-md border border-white/10 px-4 py-3 text-base font-medium text-text-light transition hover:border-accent-primary/70 hover:text-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/70"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+
+            <a
+              href={profile.resumeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-8 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-accent-primary px-4 py-3 text-sm font-semibold text-dark-bg transition hover:bg-link-hover focus:outline-none focus:ring-2 focus:ring-accent-primary/70"
+            >
+              <FileText size={17} aria-hidden="true" />
+              Download CV
+            </a>
+          </aside>
+        </>
+      )}
+    </header>
   );
 };
 
