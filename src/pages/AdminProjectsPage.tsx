@@ -1,4 +1,4 @@
-import { Edit3, Eye, LogOut, Plus, Search, Trash2 } from 'lucide-react';
+import { Activity, Edit3, Eye, LogOut, Plus, Search, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
@@ -58,6 +58,88 @@ const projectToFormValues = (project: PublicProject): ProjectFormValues => ({
   sortOrder: project.sortOrder ?? 0,
   featured: project.featured ?? true,
 });
+
+interface HealthStatus {
+  api: 'ok' | 'error' | 'checking';
+  database: 'ok' | 'error' | 'checking';
+  latency: number | null;
+}
+
+const HealthCheck = () => {
+  const [health, setHealth] = useState<HealthStatus>({ api: 'checking', database: 'checking', latency: null });
+  const [lastChecked, setLastChecked] = useState<string>('');
+
+  const checkHealth = useCallback(async () => {
+    setHealth({ api: 'checking', database: 'checking', latency: null });
+    const start = performance.now();
+
+    try {
+      const response = await fetch('/api/health', { credentials: 'include' });
+      const latency = Math.round(performance.now() - start);
+
+      if (response.ok) {
+        setHealth({ api: 'ok', database: 'ok', latency });
+      } else {
+        setHealth({ api: 'ok', database: 'error', latency });
+      }
+    } catch {
+      setHealth({ api: 'error', database: 'error', latency: null });
+    }
+
+    setLastChecked(new Date().toLocaleTimeString());
+  }, []);
+
+  useEffect(() => {
+    checkHealth();
+    const interval = setInterval(checkHealth, 60_000);
+    return () => clearInterval(interval);
+  }, [checkHealth]);
+
+  const statusDot = (status: 'ok' | 'error' | 'checking') => {
+    if (status === 'checking') return 'bg-yellow-400 animate-pulse';
+    if (status === 'ok') return 'bg-highlight-green';
+    return 'bg-red-400';
+  };
+
+  const statusLabel = (status: 'ok' | 'error' | 'checking') => {
+    if (status === 'checking') return 'Checking...';
+    if (status === 'ok') return 'Healthy';
+    return 'Unreachable';
+  };
+
+  return (
+    <div className="mt-5 rounded-lg border border-white/10 bg-surface-raised/75 p-4 shadow-editorial">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Activity size={16} className="text-accent-primary" aria-hidden="true" />
+          <h2 className="text-sm font-semibold text-text-light">System Health</h2>
+        </div>
+        <button
+          onClick={checkHealth}
+          className="rounded-md border border-white/10 px-3 py-1.5 text-xs font-semibold text-text-muted transition hover:border-accent-primary/60 hover:text-accent-primary focus:outline-none focus:ring-2 focus:ring-accent-primary/70"
+        >
+          Refresh
+        </button>
+      </div>
+      <div className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div className="flex items-center gap-2">
+          <span className={`inline-block h-2.5 w-2.5 rounded-full ${statusDot(health.api)}`} />
+          <span className="text-xs text-text-muted">API: <span className="text-text-light">{statusLabel(health.api)}</span></span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className={`inline-block h-2.5 w-2.5 rounded-full ${statusDot(health.database)}`} />
+          <span className="text-xs text-text-muted">Database: <span className="text-text-light">{statusLabel(health.database)}</span></span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-text-muted">Latency: <span className="text-text-light">{health.latency !== null ? `${health.latency}ms` : '—'}</span></span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-text-muted">Checked: <span className="text-text-light">{lastChecked || '—'}</span></span>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const AdminProjectsPage = () => {
   const navigate = useNavigate();
@@ -182,6 +264,8 @@ const AdminProjectsPage = () => {
             {notice && <p className="rounded-md border border-accent-primary/30 bg-accent-primary/10 px-4 py-3 text-sm text-accent-primary">{notice}</p>}
           </div>
         )}
+
+        <HealthCheck />
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[0.36fr_0.64fr] lg:items-start">
           <aside className="rounded-lg border border-white/10 bg-surface-raised/75 p-5 shadow-editorial">
