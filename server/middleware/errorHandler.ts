@@ -2,6 +2,7 @@ import { Prisma } from '@prisma/client';
 import type { ErrorRequestHandler } from 'express';
 import { ZodError } from 'zod';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Express error handler middleware
 export const errorHandler: ErrorRequestHandler = (error, _request, response, _next) => {
 
   if (error instanceof ZodError) {
