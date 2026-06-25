@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 const skills = [
   { icon: 'fab fa-html5', name: 'HTML', level: 95 },
   { icon: 'fab fa-css3-alt', name: 'CSS', level: 90 },
-  { icon: 'fab fa-js-square', name: 'JavaScript', level: 88 },
+  { icon: 'fab fa-square-js', name: 'JavaScript', level: 88 },
   { icon: 'fab fa-php', name: 'PHP', level: 85 },
   { icon: 'fas fa-database', name: 'MySQL', level: 80 },
   { icon: 'fab fa-react', name: 'React.js', level: 87 },

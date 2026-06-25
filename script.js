@@ -57,6 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- Hamburger Menu Toggle Function ---
     window.toggleMenu = function() {
         const navMenu = document.getElementById('nav-menu');
+        if (!navMenu) return;
         navMenu.classList.toggle('active');
     };
 
@@ -71,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (targetElement) {
                 // Close the mobile menu if it's open
                 const navMenu = document.getElementById('nav-menu');
-                if (navMenu.classList.contains('active')) {
+                if (navMenu && navMenu.classList.contains('active')) {
                     navMenu.classList.remove('active');
                 }
 
@@ -93,6 +94,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const formData = new FormData(this);
             const actionUrl = this.getAttribute('action'); // Get the GetForm.io URL
+
+            if (!actionUrl) {
+                console.error('Form action URL is missing');
+                if (formMessage) {
+                    formMessage.textContent = 'Form configuration error. Please try again later.';
+                    formMessage.style.backgroundColor = 'rgba(233, 69, 96, 0.2)';
+                    formMessage.style.borderColor = '#e94560';
+                    formMessage.style.color = '#e94560';
+                    formMessage.style.display = 'block';
+                }
+                return;
+            }
 
             try {
                 const response = await fetch(actionUrl, {
@@ -126,11 +139,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 formMessage.style.borderColor = 'var(--clr-accent-primary)';
                 formMessage.style.color = 'var(--clr-accent-primary)';
             } finally {
-                formMessage.style.display = 'block'; // Show the message
-                // Hide message after a few seconds
-                setTimeout(() => {
-                    formMessage.style.display = 'none';
-                }, 7000);
+                if (formMessage) {
+                    formMessage.style.display = 'block'; // Show the message
+                    // Hide message after a few seconds
+                    setTimeout(() => {
+                        formMessage.style.display = 'none';
+                    }, 7000);
+                }
             }
         });
     }

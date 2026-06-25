@@ -7,6 +7,7 @@ export const useTypingEffect = (phrases: string[], elementRef: React.RefObject<H
     let phraseIndex = 0;
     let charIndex = 0;
     let isDeleting = false;
+    let timeoutId: NodeJS.Timeout | null = null;
     const typingSpeed = 100;
     const deletingSpeed = 50;
     const pauseBetweenPhrases = 3000;
@@ -40,9 +41,13 @@ export const useTypingEffect = (phrases: string[], elementRef: React.RefObject<H
         currentTypingSpeed = pauseAfterDelete;
       }
 
-      setTimeout(typeWriter, currentTypingSpeed);
+      timeoutId = setTimeout(typeWriter, currentTypingSpeed);
     };
 
     typeWriter();
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [phrases, elementRef]);
 };

@@ -2,6 +2,7 @@ import React from 'react';
 
 const testimonials = [
   {
+    id: 1,
     text: 'He is easy to communicate.',
     author: 'Rh****d Ro****e',
     rating: 4.7,
@@ -9,6 +10,7 @@ const testimonials = [
     stars: 4.5,
   },
   {
+    id: 2,
     text: 'Approachable and quick to address client concerns, plus the pricing is just right.',
     author: 'R***n S***n',
     rating: 5,
@@ -21,7 +23,7 @@ const Testimonials: React.FC = () => {
   const renderStars = (stars: number) => {
     const fullStars = Math.floor(stars);
     const hasHalfStar = stars % 1 !== 0;
-    const starsArray = [];
+    const starsArray: React.ReactNode[] = [];
 
     for (let i = 0; i < fullStars; i++) {
       starsArray.push(<i key={`full-${i}`} className="fas fa-star"></i>);
@@ -56,12 +58,12 @@ const Testimonials: React.FC = () => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-          {testimonials.map((testimonial, index) => (
+          {testimonials.map((testimonial) => (
             <div
-              key={index}
+              key={testimonial.id}
               className="bg-dark-bg p-5 rounded-xl shadow-[0_4px_15px_rgba(0,0,0,0.3)] border border-accent-secondary text-center transition-all duration-300 flex flex-col justify-between hover:-translate-y-1 hover:shadow-[0_8px_25px_rgba(0,0,0,0.5),0_0_15px_rgba(0,188,212,0.4)] hover:border-highlight-blue"
               data-aos="zoom-in" 
-              data-aos-delay={400 + index * 100}
+              data-aos-delay={400 + testimonial.id * 100}
             >
               <p className="italic mb-4 text-text-muted text-base flex-grow relative pb-4">
                 <span className="absolute top-0 left-0 text-2xl text-link-hover/30">"</span>

@@ -5,18 +5,23 @@ const LoadingScreen: React.FC<{ onLoadingComplete: () => void }> = ({ onLoadingC
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout | null = null;
+
     const timer = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(timer);
-          setTimeout(() => onLoadingComplete(), 500);
+          timeoutId = setTimeout(() => onLoadingComplete(), 500);
           return 100;
         }
         return prev + 10;
       });
     }, 30);
 
-    return () => clearInterval(timer);
+    return () => {
+      clearInterval(timer);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [onLoadingComplete]);
 
   return (
