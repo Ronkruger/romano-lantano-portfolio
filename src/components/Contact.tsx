@@ -1,27 +1,62 @@
 import React, { useState } from 'react';
+import { sanitizeText, isValidEmail, validateName, validateMessage } from '../utils/sanitize';
 
 const Contact: React.FC = () => {
   const [showMessage, setShowMessage] = useState(false);
   const [messageText, setMessageText] = useState('');
   const [messageType, setMessageType] = useState<'success' | 'error'>('success');
-  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', message: '', website: '' });
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [charCount, setCharCount] = useState(0);
+  const [errors, setErrors] = useState<{ name?: string; email?: string; message?: string }>({});
+
+  const validateForm = (): boolean => {
+    const newErrors: { name?: string; email?: string; message?: string } = {};
+
+    const sanitizedName = sanitizeText(formData.name);
+    const sanitizedEmail = sanitizeText(formData.email);
+    const sanitizedMessage = sanitizeText(formData.message);
+
+    if (!validateName(sanitizedName)) {
+      newErrors.name = 'Name must be between 2 and 100 characters.';
+    }
+
+    if (!isValidEmail(sanitizedEmail)) {
+      newErrors.email = 'Please enter a valid email address.';
+    }
+
+    if (!validateMessage(sanitizedMessage)) {
+      newErrors.message = 'Message must be between 1 and 500 characters.';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+
+    if (formData.website) return;
+
+    if (!validateForm()) {
+      setMessageText('Please fix the errors in the form.');
+      setMessageType('error');
+      setShowMessage(true);
+      setTimeout(() => setShowMessage(false), 7000);
+      return;
+    }
+
     const form = e.currentTarget;
-    const formData = new FormData(form);
+    const data = new FormData(form);
     const actionUrl = form.getAttribute('action') || '';
 
     try {
       const response = await fetch(actionUrl, {
         method: 'POST',
-        body: formData,
+        body: data,
         headers: {
-          'Accept': 'application/json'
-        }
+          'Accept': 'application/json',
+        },
       });
 
       const result = await response.json();
@@ -30,6 +65,9 @@ const Contact: React.FC = () => {
         setMessageText('Thank you for your message! I\'ll get back to you soon.');
         setMessageType('success');
         form.reset();
+        setFormData({ name: '', email: '', message: '', website: '' });
+        setCharCount(0);
+        setErrors({});
       } else {
         setMessageText(result.message || 'Oops! There was an error sending your message. Please try again later.');
         setMessageType('error');
@@ -42,6 +80,15 @@ const Contact: React.FC = () => {
       setTimeout(() => {
         setShowMessage(false);
       }, 7000);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    const sanitized = sanitizeText(value);
+    setFormData({ ...formData, [name]: sanitized });
+    if (name === 'message') {
+      setCharCount(sanitized.length);
     }
   };
 
@@ -76,12 +123,13 @@ const Contact: React.FC = () => {
             name="name" 
             required
             value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            onChange={handleChange}
             onFocus={() => setFocusedField('name')}
             onBlur={() => setFocusedField(null)}
-            className="w-full p-3 mb-5 border border-accent-secondary rounded bg-dark-bg-alt text-text-light font-primary outline-none transition-all duration-300 relative z-10 focus:border-highlight-blue focus:shadow-[0_0_8px_rgba(0,188,212,0.4)] focus:scale-[1.02]"
+            className={`w-full p-3 mb-1 border rounded bg-dark-bg-alt text-text-light font-primary outline-none transition-all duration-300 relative z-10 focus:shadow-[0_0_8px_rgba(0,188,212,0.4)] focus:scale-[1.02] ${errors.name ? 'border-accent-primary focus:border-accent-primary' : 'border-accent-secondary focus:border-highlight-blue'}`}
           />
-          
+          {errors.name && <p className="text-accent-primary text-sm mb-4 relative z-10">{errors.name}</p>}
+
           <label htmlFor="email" className="mb-2 font-medium text-text-light text-lg relative z-10 transition-colors duration-200" style={{ color: focusedField === 'email' ? '#00bcd4' : '' }}>Email:</label>
           <input 
             type="email" 
@@ -89,11 +137,12 @@ const Contact: React.FC = () => {
             name="email" 
             required
             value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            onChange={handleChange}
             onFocus={() => setFocusedField('email')}
             onBlur={() => setFocusedField(null)}
-            className="w-full p-3 mb-5 border border-accent-secondary rounded bg-dark-bg-alt text-text-light font-primary outline-none transition-all duration-300 relative z-10 focus:border-highlight-blue focus:shadow-[0_0_8px_rgba(0,188,212,0.4)] focus:scale-[1.02]"
+            className={`w-full p-3 mb-1 border rounded bg-dark-bg-alt text-text-light font-primary outline-none transition-all duration-300 relative z-10 focus:shadow-[0_0_8px_rgba(0,188,212,0.4)] focus:scale-[1.02] ${errors.email ? 'border-accent-primary focus:border-accent-primary' : 'border-accent-secondary focus:border-highlight-blue'}`}
           />
+          {errors.email && <p className="text-accent-primary text-sm mb-4 relative z-10">{errors.email}</p>}
           
           <label htmlFor="file" className="mb-2 font-medium text-text-light text-lg relative z-10">Insert File (Optional):</label>
           <input 
@@ -114,14 +163,26 @@ const Contact: React.FC = () => {
               required
               maxLength={500}
               value={formData.message}
-              onChange={(e) => {
-                setFormData({ ...formData, message: e.target.value });
-                setCharCount(e.target.value.length);
-              }}
+              onChange={handleChange}
               onFocus={() => setFocusedField('message')}
               onBlur={() => setFocusedField(null)}
-              className="w-full p-3 mb-5 border border-accent-secondary rounded bg-dark-bg-alt text-text-light font-primary outline-none transition-all duration-300 min-h-[120px] resize-y relative z-10 focus:border-highlight-blue focus:shadow-[0_0_8px_rgba(0,188,212,0.4)] focus:scale-[1.02]"
+              className={`w-full p-3 mb-1 border rounded bg-dark-bg-alt text-text-light font-primary outline-none transition-all duration-300 min-h-[120px] resize-y relative z-10 focus:shadow-[0_0_8px_rgba(0,188,212,0.4)] focus:scale-[1.02] ${errors.message ? 'border-accent-primary focus:border-accent-primary' : 'border-accent-secondary focus:border-highlight-blue'}`}
             ></textarea>
+            {errors.message && <p className="text-accent-primary text-sm mb-4 relative z-10">{errors.message}</p>}
+          </div>
+
+          {/* Honeypot field for spam protection */}
+          <div className="absolute left-[-9999px]" aria-hidden="true">
+            <label htmlFor="website">Website</label>
+            <input 
+              type="text" 
+              id="website" 
+              name="website" 
+              tabIndex={-1}
+              autoComplete="off"
+              value={formData.website}
+              onChange={handleChange}
+            />
           </div>
           
           <button 

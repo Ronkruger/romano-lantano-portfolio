@@ -14,5 +14,9 @@ module.exports = {
       'warn',
       { allowConstantExport: true },
     ],
+    'no-eval': 'error',
+    'no-implied-eval': 'error',
+    'no-script-url': 'error',
+    '@typescript-eslint/no-explicit-any': 'warn',
   },
 }

@@ -24,7 +24,7 @@ const Header: React.FC = () => {
       <div className="fixed top-0 left-0 right-0 z-50 bg-dark-bg/95 backdrop-blur-sm shadow-lg">
         <div className="w-[90%] max-w-7xl mx-auto flex justify-between items-center p-5">
           <a 
-            href="./resume/Lantano_Romano_resume.pdf" 
+            href="./resume/Lantano_Romano_resume.pdf?v=2" 
             target="_blank" 
             className="inline-block px-5 py-2.5 bg-accent-primary text-white no-underline border-2 border-accent-primary rounded-md font-semibold transition-all duration-300 hover:bg-transparent hover:text-accent-primary hover:shadow-[0_0_15px_rgba(233,69,96,0.6)]"
           >
