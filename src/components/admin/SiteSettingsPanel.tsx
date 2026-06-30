@@ -176,7 +176,7 @@ const SiteSettingsPanel = () => {
             </label>
             {uploading && <Loader2 size={16} className="animate-spin text-accent-primary" />}
           </div>
-          <p className="mt-2 text-xs text-text-muted">PDF only, max 10MB. Uploaded to Cloudinary.</p>
+          <p className="mt-2 text-xs text-text-muted">PDF only, max 10MB. Uploaded to S3.</p>
         </div>
 
         <div className="flex justify-end pt-2">

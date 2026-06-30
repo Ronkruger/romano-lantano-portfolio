@@ -62,7 +62,7 @@ const projectToFormValues = (project: PublicProject): ProjectFormValues => ({
 
 interface SystemStatus {
   database: { status: string; latency?: number };
-  cloudinary: { configured: boolean; cloudName: string | null; folder: string | null };
+  storage: { configured: boolean; bucket: string | null; region: string | null };
   auth: { jwtConfigured: boolean; adminUsername: string; passwordHashSet: boolean; cookieSecure: boolean };
   environment: { nodeEnv: string; port: number; uptime: number; nodeVersion: string; memoryUsage: number };
 }
@@ -159,17 +159,17 @@ const SystemStatusPanel = () => {
           )}
         </div>
 
-        {/* Cloudinary */}
+        {/* Storage */}
         <div className="rounded-lg border border-white/10 bg-dark-bg/60 p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">Cloudinary</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">Storage</p>
           <div className="mt-2">
-            <StatusBadge ok={status.cloudinary.configured} label={status.cloudinary.configured ? 'Configured' : 'Not configured'} />
+            <StatusBadge ok={status.storage.configured} label={status.storage.configured ? 'Configured' : 'Not configured'} />
           </div>
-          {status.cloudinary.cloudName && (
-            <p className="mt-2 text-xs text-text-muted">Cloud: <span className="text-text-light">{status.cloudinary.cloudName}</span></p>
+          {status.storage.bucket && (
+            <p className="mt-2 text-xs text-text-muted">Bucket: <span className="text-text-light">{status.storage.bucket}</span></p>
           )}
-          {status.cloudinary.folder && (
-            <p className="mt-1 text-xs text-text-muted">Folder: <span className="text-text-light">{status.cloudinary.folder}</span></p>
+          {status.storage.region && (
+            <p className="mt-1 text-xs text-text-muted">Region: <span className="text-text-light">{status.storage.region}</span></p>
           )}
         </div>
 
