@@ -8,6 +8,7 @@ import LoadingScreen from './components/LoadingScreen';
 import HomePage from './pages/HomePage';
 import NotFoundPage from './pages/NotFoundPage';
 import ProjectCaseStudyPage from './pages/ProjectCaseStudyPage';
+import { SettingsProvider } from './context/SettingsContext';
 
 const ThreeBackground = lazy(() => import('./components/ThreeBackground'));
 const AdminLoginPage = lazy(() => import('./pages/AdminLoginPage'));
@@ -22,29 +23,31 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <Toaster position="top-center" />
-      <Suspense fallback={null}>
-        <ThreeBackground />
-      </Suspense>
+      <SettingsProvider>
+        <Toaster position="top-center" />
+        <Suspense fallback={null}>
+          <ThreeBackground />
+        </Suspense>
 
-      <Routes>
-        <Route path="admin/login" element={<Suspense fallback={null}><AdminLoginPage /></Suspense>} />
-        <Route
-          path="admin/projects"
-          element={(
-            <ProtectedAdminRoute>
-              <Suspense fallback={null}>
-                <AdminProjectsPage />
-              </Suspense>
-            </ProtectedAdminRoute>
-          )}
-        />
-        <Route element={<AppShell />}>
-          <Route index element={<HomePage />} />
-          <Route path="projects/:slug" element={<ProjectCaseStudyPage />} />
-          <Route path="*" element={<NotFoundPage />} />
-        </Route>
-      </Routes>
+        <Routes>
+          <Route path="admin/login" element={<Suspense fallback={null}><AdminLoginPage /></Suspense>} />
+          <Route
+            path="admin/projects"
+            element={(
+              <ProtectedAdminRoute>
+                <Suspense fallback={null}>
+                  <AdminProjectsPage />
+                </Suspense>
+              </ProtectedAdminRoute>
+            )}
+          />
+          <Route element={<AppShell />}>
+            <Route index element={<HomePage />} />
+            <Route path="projects/:slug" element={<ProjectCaseStudyPage />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Route>
+        </Routes>
+      </SettingsProvider>
     </ErrorBoundary>
   );
 }

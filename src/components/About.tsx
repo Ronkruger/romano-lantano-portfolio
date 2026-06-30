@@ -1,8 +1,10 @@
 import { CheckCircle2 } from 'lucide-react';
 import Section from './ui/Section';
-import { heroStats, profile } from '../data/portfolio';
+import { heroStats } from '../data/portfolio';
+import { useSettings } from '../context/SettingsContext';
 
 const About = () => {
+  const { profile } = useSettings();
   return (
     <Section
       id="about"

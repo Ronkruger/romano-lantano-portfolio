@@ -1,6 +1,7 @@
-import { socialLinks } from '../data/portfolio';
+import { useSettings } from '../context/SettingsContext';
 
 const Footer = () => {
+  const { socialLinks } = useSettings();
   return (
     <footer className="relative z-10 border-t border-white/10 bg-dark-bg/90 py-10 text-text-muted">
       <div className="mx-auto flex w-[90%] max-w-7xl flex-col items-center gap-5 px-5 text-center md:flex-row md:justify-between md:text-left">

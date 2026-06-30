@@ -1,10 +1,12 @@
 import { ArrowRight, Download, Mail, MapPin } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { credibilityMetrics, heroStats, profile } from '../data/portfolio';
+import { credibilityMetrics, heroStats } from '../data/portfolio';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
+import { useSettings } from '../context/SettingsContext';
 
 const Hero = () => {
+  const { profile } = useSettings();
   const prefersReducedMotion = usePrefersReducedMotion();
   const initialState = prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 28 };
   const animateState = { opacity: 1, y: 0 };

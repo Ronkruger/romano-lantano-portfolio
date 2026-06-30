@@ -1,9 +1,11 @@
 import { FileText, Menu, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { navItems, profile } from '../data/portfolio';
+import { navItems } from '../data/portfolio';
+import { useSettings } from '../context/SettingsContext';
 
 const Header = () => {
+  const { profile } = useSettings();
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
 

@@ -1,7 +1,7 @@
 import { Mail, MapPin, Paperclip, Send } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import Section from './ui/Section';
-import { profile, socialLinks } from '../data/portfolio';
+import { useSettings } from '../context/SettingsContext';
 
 type SubmitStatus = 'idle' | 'submitting' | 'success' | 'error';
 
@@ -12,6 +12,7 @@ const initialFormData = {
 };
 
 const Contact = () => {
+  const { profile, socialLinks } = useSettings();
   const [formData, setFormData] = useState(initialFormData);
   const [charCount, setCharCount] = useState(0);
   const [status, setStatus] = useState<SubmitStatus>('idle');
