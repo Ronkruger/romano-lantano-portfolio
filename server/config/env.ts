@@ -7,10 +7,12 @@ export const env = {
   adminUsername: process.env.ADMIN_USERNAME ?? 'admin',
   adminPasswordHash: process.env.ADMIN_PASSWORD_HASH ?? '',
   cookieSecure: process.env.COOKIE_SECURE === 'true' || process.env.NODE_ENV === 'production',
-  cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME ?? '',
-  cloudinaryApiKey: process.env.CLOUDINARY_API_KEY ?? '',
-  cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET ?? '',
-  cloudinaryFolder: process.env.CLOUDINARY_FOLDER ?? 'romano-portfolio/projects',
+  awsRegion: process.env.AWS_REGION ?? 'us-east-1',
+  awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID ?? '',
+  awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY ?? '',
+  s3BucketName: process.env.S3_BUCKET_NAME ?? '',
+  s3ProjectsFolder: process.env.S3_PROJECTS_FOLDER ?? 'projects',
+  s3ResumeFolder: process.env.S3_RESUME_FOLDER ?? 'resume',
 };
 
 export const requireServerSecret = (value: string, label: string) => {

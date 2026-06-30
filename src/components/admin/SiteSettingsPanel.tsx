@@ -1,5 +1,6 @@
 import { FileText, Globe, Loader2, Mail, MapPin, Save, Upload, User } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import toast from 'react-hot-toast';
 import { fetchAdminSettings, updateAdminSettings, uploadResume, type SiteSettingsValues } from '../../api/admin';
 
 const SiteSettingsPanel = () => {
@@ -7,8 +8,6 @@ const SiteSettingsPanel = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState('');
-  const [notice, setNotice] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const loadSettings = useCallback(async () => {
@@ -17,7 +16,7 @@ const SiteSettingsPanel = () => {
       const data = await fetchAdminSettings();
       setSettings(data);
     } catch {
-      setError('Unable to load site settings.');
+      toast.error('Unable to load site settings.');
     } finally {
       setLoading(false);
     }
@@ -32,8 +31,6 @@ const SiteSettingsPanel = () => {
     if (!settings) return;
 
     setSaving(true);
-    setError('');
-    setNotice('');
 
     try {
       const updated = await updateAdminSettings({
@@ -47,9 +44,9 @@ const SiteSettingsPanel = () => {
         facebookUrl: settings.facebookUrl,
       });
       setSettings(updated);
-      setNotice('Settings saved.');
+      toast.success('Settings saved.');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to save settings.');
+      toast.error(err instanceof Error ? err.message : 'Unable to save settings.');
     } finally {
       setSaving(false);
     }
@@ -60,15 +57,13 @@ const SiteSettingsPanel = () => {
     if (!file) return;
 
     setUploading(true);
-    setError('');
-    setNotice('');
 
     try {
       const { settings: updated } = await uploadResume(file);
       setSettings(updated);
-      setNotice('Resume uploaded successfully.');
+      toast.success('Resume uploaded successfully.');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to upload resume.');
+      toast.error(err instanceof Error ? err.message : 'Unable to upload resume.');
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -105,13 +100,6 @@ const SiteSettingsPanel = () => {
           <p className="mt-1 text-sm text-text-muted">Edit your profile info, social links, and resume.</p>
         </div>
       </div>
-
-      {(error || notice) && (
-        <div className="mt-4" aria-live="polite">
-          {error && <p className="rounded-md border border-red-400/30 bg-red-950/30 px-4 py-3 text-sm text-red-200" role="alert">{error}</p>}
-          {notice && <p className="rounded-md border border-accent-primary/30 bg-accent-primary/10 px-4 py-3 text-sm text-accent-primary">{notice}</p>}
-        </div>
-      )}
 
       <form onSubmit={handleSubmit} className="mt-5 space-y-5">
         <div className="grid gap-5 md:grid-cols-2">

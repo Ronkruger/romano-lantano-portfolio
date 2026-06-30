@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { prisma } from '../db.js';
 import { requireAdmin } from '../middleware/auth.js';
+import { createS3Client, deleteObjectFromS3, getPublicS3Url, uploadBufferToS3 } from '../utils/s3.js';
 
 const settingsUpdateSchema = z.object({
   name: z.string().trim().min(1).max(100),
@@ -65,14 +66,9 @@ adminSettingsRouter.put('/', async (request, response, next) => {
 adminSettingsRouter.post('/resume', async (request, response, next) => {
   try {
     const multer = (await import('multer')).default;
-    const { v2: cloudinary } = await import('cloudinary');
     const { env } = await import('../config/env.js');
 
-    cloudinary.config({
-      cloud_name: env.cloudinaryCloudName,
-      api_key: env.cloudinaryApiKey,
-      api_secret: env.cloudinaryApiSecret,
-    });
+    const s3Client = createS3Client();
 
     const upload = multer({
       storage: multer.memoryStorage(),
@@ -98,38 +94,33 @@ adminSettingsRouter.post('/resume', async (request, response, next) => {
       }
 
       try {
-        // Get current settings to delete old resume if exists
+        const bucketName = env.s3BucketName;
+        const folder = env.s3ResumeFolder;
+
         const current = await prisma.siteSettings.findUnique({ where: { id: 'singleton' } });
         if (current?.resumePublicId) {
-          await cloudinary.uploader.destroy(current.resumePublicId, { resource_type: 'raw' }).catch(() => {});
+          await deleteObjectFromS3({ client: s3Client, bucketName, key: current.resumePublicId }).catch(() => {});
         }
 
-        // Upload new resume
-        const result = await new Promise<{ secure_url: string; public_id: string }>((resolve, reject) => {
-          const stream = cloudinary.uploader.upload_stream(
-            {
-              folder: `${env.cloudinaryFolder}/resume`,
-              resource_type: 'raw',
-              public_id: 'Lantano_Romano_resume',
-              format: 'pdf',
-              overwrite: true,
-            },
-            (error, result) => {
-              if (error || !result) reject(error ?? new Error('Upload failed'));
-              else resolve({ secure_url: result.secure_url, public_id: result.public_id });
-            },
-          );
-          stream.end(request.file!.buffer);
+        const key = `${folder}/Lantano_Romano_resume.pdf`;
+        await uploadBufferToS3({
+          client: s3Client,
+          bucketName,
+          key,
+          body: request.file.buffer,
+          contentType: 'application/pdf',
         });
+
+        const resumeUrl = getPublicS3Url({ bucketName, key });
 
         // Update settings with new resume URL
         const settings = await prisma.siteSettings.upsert({
           where: { id: 'singleton' },
-          update: { resumeUrl: result.secure_url, resumePublicId: result.public_id },
-          create: { id: 'singleton', resumeUrl: result.secure_url, resumePublicId: result.public_id },
+          update: { resumeUrl, resumePublicId: key },
+          create: { id: 'singleton', resumeUrl, resumePublicId: key },
         });
 
-        response.json({ settings, resumeUrl: result.secure_url });
+        response.json({ settings, resumeUrl });
       } catch (error) {
         next(error);
       }

@@ -38,11 +38,11 @@ export const createApp = () => {
       database = { status: 'unreachable' };
     }
 
-    // Cloudinary check
-    const cloudinary = {
-      configured: Boolean(env.cloudinaryCloudName && env.cloudinaryCloudName !== 'your-cloud-name' && env.cloudinaryApiKey && env.cloudinaryApiKey !== 'your-api-key' && env.cloudinaryApiSecret && env.cloudinaryApiSecret !== 'your-api-secret'),
-      cloudName: env.cloudinaryCloudName || null,
-      folder: env.cloudinaryFolder || null,
+    // AWS S3 check
+    const storage = {
+      configured: Boolean(env.s3BucketName && env.s3BucketName !== 'your-s3-bucket-name' && env.awsAccessKeyId && env.awsSecretAccessKey),
+      bucket: env.s3BucketName || null,
+      region: env.awsRegion || null,
     };
 
     // Auth config check
@@ -62,7 +62,7 @@ export const createApp = () => {
       memoryUsage: Math.round(process.memoryUsage().rss / 1024 / 1024),
     };
 
-    response.json({ database, cloudinary, auth, environment });
+    response.json({ database, storage, auth, environment });
   });
 
   app.use('/api/auth', authRouter);

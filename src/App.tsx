@@ -1,5 +1,6 @@
 import { Suspense, lazy, useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import ProtectedAdminRoute from './components/admin/ProtectedAdminRoute';
 import AppShell from './components/AppShell';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -21,6 +22,7 @@ function App() {
 
   return (
     <ErrorBoundary>
+      <Toaster position="top-center" />
       <Suspense fallback={null}>
         <ThreeBackground />
       </Suspense>

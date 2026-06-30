@@ -1,8 +1,11 @@
-import { v2 as cloudinary } from 'cloudinary';
 import { Router } from 'express';
 import multer from 'multer';
+import sharp from 'sharp';
 import { env, requireServerSecret } from '../config/env.js';
 import { requireAdmin } from '../middleware/auth.js';
+import { createS3Client, getPublicS3Url, uploadBufferToS3 } from '../utils/s3.js';
+
+const s3Client = createS3Client();
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -26,33 +29,35 @@ uploadsRouter.post('/', requireAdmin, upload.single('image'), async (request, re
       return;
     }
 
-    cloudinary.config({
-      cloud_name: requireServerSecret(env.cloudinaryCloudName, 'CLOUDINARY_CLOUD_NAME'),
-      api_key: requireServerSecret(env.cloudinaryApiKey, 'CLOUDINARY_API_KEY'),
-      api_secret: requireServerSecret(env.cloudinaryApiSecret, 'CLOUDINARY_API_SECRET'),
+    const bucketName = requireServerSecret(env.s3BucketName, 'S3_BUCKET_NAME');
+    const folder = env.s3ProjectsFolder;
+    
+    // Optimize image with sharp (resize, quality, format)
+    const optimizedImageBuffer = await sharp(request.file.buffer)
+      .resize(1600, 1600, {
+        fit: 'inside',
+        withoutEnlargement: true,
+      })
+      .webp({ quality: 80 })
+      .toBuffer();
+
+    // Generate unique key with timestamp
+    const timestamp = Date.now();
+    const randomStr = Math.random().toString(36).substring(2, 8);
+    const key = `${folder}/${timestamp}-${randomStr}.webp`;
+
+    await uploadBufferToS3({
+      client: s3Client,
+      bucketName,
+      key,
+      body: optimizedImageBuffer,
+      contentType: 'image/webp',
     });
 
-    const uploadResult = await new Promise<{ secure_url: string; public_id: string }>((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
-        {
-          folder: env.cloudinaryFolder,
-          resource_type: 'image',
-          transformation: [{ width: 1600, crop: 'limit' }, { quality: 'auto', fetch_format: 'auto' }],
-        },
-        (error, result) => {
-          if (error || !result) {
-            reject(error ?? new Error('Cloudinary upload failed.'));
-            return;
-          }
+    const imageUrl = getPublicS3Url({ bucketName, key });
+    const imagePublicId = key;
 
-          resolve({ secure_url: result.secure_url, public_id: result.public_id });
-        },
-      );
-
-      stream.end(request.file?.buffer);
-    });
-
-    response.status(201).json({ imageUrl: uploadResult.secure_url, imagePublicId: uploadResult.public_id });
+    response.status(201).json({ imageUrl, imagePublicId });
   } catch (error) {
     next(error);
   }
