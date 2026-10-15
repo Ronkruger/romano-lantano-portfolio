@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { prisma } from '../db.js';
 import { requireAdmin } from '../middleware/auth.js';
-import { createS3Client, deleteObjectFromS3, getPublicS3Url, uploadBufferToS3 } from '../utils/s3.js';
+import { uploadToCloudinary } from '../utils/cloudinary.js';
 
 const settingsUpdateSchema = z.object({
   name: z.string().trim().min(1).max(100),
@@ -68,8 +68,6 @@ adminSettingsRouter.post('/resume', async (request, response, next) => {
     const multer = (await import('multer')).default;
     const { env } = await import('../config/env.js');
 
-    const s3Client = createS3Client();
-
     const upload = multer({
       storage: multer.memoryStorage(),
       limits: { fileSize: 10 * 1024 * 1024 }, // 10MB for PDFs
@@ -94,30 +92,18 @@ adminSettingsRouter.post('/resume', async (request, response, next) => {
       }
 
       try {
-        const bucketName = env.s3BucketName;
-        const folder = env.s3ResumeFolder;
-
-        const current = await prisma.siteSettings.findUnique({ where: { id: 'singleton' } });
-        if (current?.resumePublicId) {
-          await deleteObjectFromS3({ client: s3Client, bucketName, key: current.resumePublicId }).catch(() => {});
+        if (request.file.buffer.subarray(0, 5).toString() !== '%PDF-') {
+          response.status(400).json({ message: 'Choose a valid PDF file.' });
+          return;
         }
-
-        const key = `${folder}/Lantano_Romano_resume.pdf`;
-        await uploadBufferToS3({
-          client: s3Client,
-          bucketName,
-          key,
-          body: request.file.buffer,
-          contentType: 'application/pdf',
-        });
-
-        const resumeUrl = getPublicS3Url({ bucketName, key });
+        const result = await uploadToCloudinary(request.file.buffer, env.cloudinaryResumeFolder, 'raw', '.pdf');
+        const resumeUrl = result.secure_url;
 
         // Update settings with new resume URL
         const settings = await prisma.siteSettings.upsert({
           where: { id: 'singleton' },
-          update: { resumeUrl, resumePublicId: key },
-          create: { id: 'singleton', resumeUrl, resumePublicId: key },
+          update: { resumeUrl, resumePublicId: result.public_id },
+          create: { id: 'singleton', resumeUrl, resumePublicId: result.public_id },
         });
 
         response.json({ settings, resumeUrl });

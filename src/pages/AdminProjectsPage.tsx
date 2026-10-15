@@ -62,7 +62,7 @@ const projectToFormValues = (project: PublicProject): ProjectFormValues => ({
 
 interface SystemStatus {
   database: { status: string; latency?: number };
-  storage: { configured: boolean; bucket: string | null; region: string | null };
+  storage: { configured: boolean; provider: string; cloudName: string | null };
   auth: { jwtConfigured: boolean; adminUsername: string; passwordHashSet: boolean; cookieSecure: boolean };
   environment: { nodeEnv: string; port: number; uptime: number; nodeVersion: string; memoryUsage: number };
 }
@@ -165,11 +165,11 @@ const SystemStatusPanel = () => {
           <div className="mt-2">
             <StatusBadge ok={status.storage.configured} label={status.storage.configured ? 'Configured' : 'Not configured'} />
           </div>
-          {status.storage.bucket && (
-            <p className="mt-2 text-xs text-text-muted">Bucket: <span className="text-text-light">{status.storage.bucket}</span></p>
+          {status.storage.provider && (
+            <p className="mt-2 text-xs text-text-muted">Provider: <span className="text-text-light">{status.storage.provider}</span></p>
           )}
-          {status.storage.region && (
-            <p className="mt-1 text-xs text-text-muted">Region: <span className="text-text-light">{status.storage.region}</span></p>
+          {status.storage.cloudName && (
+            <p className="mt-1 text-xs text-text-muted">Cloud: <span className="text-text-light">{status.storage.cloudName}</span></p>
           )}
         </div>
 

@@ -1,5 +1,7 @@
 # AWS S3 + Lambda Migration Guide
 
+> Historical reference: the application now uses Cloudinary for all uploads. Follow [CLOUDINARY-SETUP.md](../CLOUDINARY-SETUP.md) for current deployment instructions. The Lambda example here is not part of the application upload flow.
+
 This guide explains how to set up AWS S3 for file storage and Lambda for image processing, replacing Cloudinary.
 
 ## Architecture

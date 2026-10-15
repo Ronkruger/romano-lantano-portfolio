@@ -32,6 +32,17 @@ const Contact = () => {
     setStatusMessage('Sending your message...');
 
     try {
+      const attachment = requestBody.get('file');
+      requestBody.delete('file');
+      if (attachment instanceof File && attachment.size > 0) {
+        if (attachment.size > 5 * 1024 * 1024) throw new Error('Attachment must be 5MB or smaller.');
+        const uploadBody = new FormData();
+        uploadBody.append('file', attachment);
+        const uploadResponse = await fetch('/api/contact/attachments', { method: 'POST', body: uploadBody });
+        const uploaded = await uploadResponse.json() as { url?: string; message?: string };
+        if (!uploadResponse.ok || !uploaded.url) throw new Error(uploaded.message || 'Attachment upload failed.');
+        requestBody.set('attachment_url', uploaded.url);
+      }
       const response = await fetch(actionUrl, {
         method: 'POST',
         body: requestBody,
@@ -50,10 +61,10 @@ const Contact = () => {
       setStatusMessage("Thank you for your message. I'll get back to you soon.");
       setFormData(initialFormData);
       setCharCount(0);
-      // form.reset() is redundant — controlled state already resets the fields
-    } catch {
+      form.reset();
+    } catch (error) {
       setStatus('error');
-      setStatusMessage('There was a problem sending your message. Please try again or email me directly.');
+      setStatusMessage(error instanceof Error ? error.message : 'There was a problem sending your message. Please try again or email me directly.');
     }
   };
 
@@ -153,8 +164,10 @@ const Contact = () => {
               type="file"
               id="file"
               name="file"
+              accept="application/pdf,image/jpeg,image/png,image/webp"
               className="w-full rounded-md border border-dashed border-white/15 bg-dark-bg-alt px-4 py-3 text-sm text-text-muted file:mr-4 file:rounded-md file:border-0 file:bg-accent-primary file:px-3 file:py-2 file:text-sm file:font-semibold file:text-dark-bg focus:outline-none focus:ring-2 focus:ring-accent-primary/30"
             />
+            <p className="mt-2 text-xs text-text-muted">PDF, JPEG, PNG or WebP, up to 5MB. Attachments are stored on Cloudinary and shared as a link; avoid confidential files.</p>
           </div>
 
           <div className="mt-5">

@@ -1,9 +1,15 @@
 import { Prisma } from '@prisma/client';
 import type { ErrorRequestHandler } from 'express';
 import { ZodError } from 'zod';
+import { MulterError } from 'multer';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Express error handler middleware
 export const errorHandler: ErrorRequestHandler = (error, _request, response, _next) => {
+
+  if (error instanceof MulterError) {
+    response.status(400).json({ message: error.code === 'LIMIT_FILE_SIZE' ? 'File exceeds the upload size limit.' : 'Invalid upload request.' });
+    return;
+  }
 
   if (error instanceof ZodError) {
     response.status(400).json({ message: 'Validation failed.', issues: error.flatten().fieldErrors });

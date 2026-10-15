@@ -9,7 +9,7 @@ import { errorHandler } from './middleware/errorHandler.js';
 import { authRouter } from './routes/auth.js';
 import { adminProjectsRouter, projectsRouter } from './routes/projects.js';
 import { adminSettingsRouter, settingsRouter } from './routes/settings.js';
-import { uploadsRouter } from './routes/uploads.js';
+import { uploadsRouter, attachmentsRouter } from './routes/uploads.js';
 
 export const createApp = () => {
   const app = express();
@@ -38,11 +38,11 @@ export const createApp = () => {
       database = { status: 'unreachable' };
     }
 
-    // AWS S3 check
+    // Presence of configuration does not verify provider connectivity.
     const storage = {
-      configured: Boolean(env.s3BucketName && env.s3BucketName !== 'your-s3-bucket-name' && env.awsAccessKeyId && env.awsSecretAccessKey),
-      bucket: env.s3BucketName || null,
-      region: env.awsRegion || null,
+      configured: Boolean(env.cloudinaryCloudName && env.cloudinaryApiKey && env.cloudinaryApiSecret),
+      provider: 'Cloudinary',
+      cloudName: env.cloudinaryCloudName || null,
     };
 
     // Auth config check
@@ -71,6 +71,7 @@ export const createApp = () => {
   app.use('/api/admin/projects', adminProjectsRouter);
   app.use('/api/admin/settings', adminSettingsRouter);
   app.use('/api/admin/uploads', uploadsRouter);
+  app.use('/api/contact/attachments', attachmentsRouter);
   app.use('/api', (_request, response) => {
     response.status(404).json({ message: 'API route not found.' });
   });
