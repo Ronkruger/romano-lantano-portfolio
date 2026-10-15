@@ -7,11 +7,17 @@ export const useScrollProgress = () => {
     const updateScrollProgress = () => {
       const scrollPx = document.documentElement.scrollTop;
       const winHeightPx = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      if (winHeightPx <= 0) {
+        setScrollProgress(0);
+        return;
+      }
+
       const scrolled = (scrollPx / winHeightPx) * 100;
-      setScrollProgress(scrolled);
+      setScrollProgress(Math.min(100, Math.max(0, scrolled)));
     };
 
-    window.addEventListener('scroll', updateScrollProgress);
+    updateScrollProgress();
+    window.addEventListener('scroll', updateScrollProgress, { passive: true });
     return () => window.removeEventListener('scroll', updateScrollProgress);
   }, []);
 

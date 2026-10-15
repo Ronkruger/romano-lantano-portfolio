@@ -1,0 +1,12 @@
+{
+  "name": "image-processor-lambda",
+  "version": "1.0.0",
+  "description": "AWS Lambda function for processing portfolio images",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.400.0",
+    "sharp": "^0.33.0"
+  },
+  "scripts": {
+    "zip": "zip -r function.zip . -x '*.git*' 'node_modules/aws-sdk*'"
+  }
+}

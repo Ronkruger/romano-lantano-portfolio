@@ -1,0 +1,33 @@
+import type { Project } from '@prisma/client';
+
+export const toPublicProject = (project: Project) => ({
+  id: project.id,
+  slug: project.slug,
+  title: project.title,
+  eyebrow: project.eyebrow,
+  summary: project.summary,
+  description: project.description,
+  image: project.imageUrl,
+  imageUrl: project.imageUrl,
+  imagePublicId: project.imagePublicId,
+  stack: project.stack,
+  role: project.role,
+  timeframe: project.timeframe,
+  links: {
+    github: project.githubUrl,
+    demo: project.demoUrl ?? undefined,
+    demoAdmin: project.demoAdminUrl ?? undefined,
+  },
+  githubUrl: project.githubUrl,
+  demoUrl: project.demoUrl,
+  demoAdminUrl: project.demoAdminUrl,
+  problem: project.problem,
+  solution: project.solution,
+  highlights: project.highlights,
+  outcome: project.outcome,
+  accent: project.accent,
+  sortOrder: project.sortOrder,
+  featured: project.featured,
+  createdAt: project.createdAt.toISOString(),
+  updatedAt: project.updatedAt.toISOString(),
+});

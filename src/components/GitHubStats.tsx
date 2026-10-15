@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { Activity, Code2, GitFork, Star, Users } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import Section from './ui/Section';
 
 interface GitHubStats {
   repos: number;
@@ -12,7 +14,41 @@ interface GitHubRepo {
   stargazers_count: number;
 }
 
-const GitHubStats: React.FC = () => {
+interface GitHubUser {
+  public_repos: number;
+  followers: number;
+}
+
+const CACHE_KEY = 'github_stats_cache';
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+interface CachedStats {
+  data: GitHubStats;
+  timestamp: number;
+}
+
+const readCache = (): GitHubStats | null => {
+  try {
+    const raw = sessionStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const cached: CachedStats = JSON.parse(raw);
+    if (Date.now() - cached.timestamp > CACHE_TTL_MS) return null;
+    return cached.data;
+  } catch {
+    return null;
+  }
+};
+
+const writeCache = (data: GitHubStats) => {
+  try {
+    const payload: CachedStats = { data, timestamp: Date.now() };
+    sessionStorage.setItem(CACHE_KEY, JSON.stringify(payload));
+  } catch {
+    // sessionStorage unavailable — silently skip
+  }
+};
+
+const GitHubStats = () => {
   const [stats, setStats] = useState<GitHubStats>({
     repos: 0,
     followers: 0,
@@ -20,33 +56,57 @@ const GitHubStats: React.FC = () => {
     contributions: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchGitHubStats = async () => {
+      // Return cached data immediately if available
+      const cached = readCache();
+      if (cached) {
+        setStats(cached);
+        setLoading(false);
+        return;
+      }
+
       try {
         const username = 'Ronkruger';
-        const response = await fetch(`https://api.github.com/users/${username}`);
-        const data = await response.json();
-        
-        // Fetch repos to count total stars
-        const reposResponse = await fetch(`https://api.github.com/users/${username}/repos?per_page=100`);
-        const reposData = await reposResponse.json();
+        const response = await fetch(`https://api.github.com/users/${username}`, { signal: controller.signal });
+        const reposResponse = await fetch(`https://api.github.com/users/${username}/repos?per_page=100`, { signal: controller.signal });
+
+        if (!response.ok || !reposResponse.ok) {
+          throw new Error('GitHub request failed');
+        }
+
+        const data = (await response.json()) as GitHubUser;
+        const reposData = (await reposResponse.json()) as GitHubRepo[];
         const totalStars = reposData.reduce((acc: number, repo: GitHubRepo) => acc + repo.stargazers_count, 0);
 
-        setStats({
+        const freshStats: GitHubStats = {
           repos: data.public_repos,
           followers: data.followers,
           stars: totalStars,
-          contributions: 150, // Approximate - requires GraphQL API
-        });
+          contributions: 150, // Approximate — requires GitHub GraphQL API
+        };
+
+        writeCache(freshStats);
+        setStats(freshStats);
+        setError('');
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching GitHub stats:', error);
+        if (error instanceof DOMException && error.name === 'AbortError') {
+          return;
+        }
+
+        setError('GitHub stats are temporarily unavailable.');
         setLoading(false);
       }
     };
 
     fetchGitHubStats();
+
+    return () => controller.abort();
   }, []);
 
   const containerVariants = {
@@ -74,56 +134,62 @@ const GitHubStats: React.FC = () => {
   };
 
   const statItems = [
-    { label: 'Repositories', value: stats.repos, icon: 'fa-code-branch', color: 'text-highlight-blue' },
-    { label: 'Followers', value: stats.followers, icon: 'fa-users', color: 'text-accent-primary' },
-    { label: 'Total Stars', value: stats.stars, icon: 'fa-star', color: 'text-link-hover' },
-    { label: 'Contributions', value: stats.contributions, icon: 'fa-code-commit', color: 'text-highlight-green' },
+    { label: 'Repositories', value: stats.repos, icon: GitFork, color: 'text-highlight-blue' },
+    { label: 'Followers', value: stats.followers, icon: Users, color: 'text-accent-primary' },
+    { label: 'Total Stars', value: stats.stars, icon: Star, color: 'text-link-hover' },
+    { label: 'Activity Score', value: stats.contributions, icon: Activity, color: 'text-highlight-green' },
   ];
 
   if (loading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="bg-dark-bg-alt p-4 rounded-lg animate-pulse">
-            <div className="h-8 bg-accent-secondary/20 rounded mb-2"></div>
-            <div className="h-4 bg-accent-secondary/20 rounded w-3/4"></div>
-          </div>
-        ))}
-      </div>
+      <Section eyebrow="Open source" title="GitHub activity" description="Live public signals from my GitHub profile." centered>
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+          {[1, 2, 3, 4].map((item) => (
+            <div key={item} className="animate-pulse rounded-lg border border-white/10 bg-surface-raised/70 p-5">
+              <div className="mb-3 h-8 rounded bg-white/10" />
+              <div className="h-4 w-3/4 rounded bg-white/10" />
+            </div>
+          ))}
+        </div>
+      </Section>
     );
   }
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true }}
-      className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8"
-    >
-      {statItems.map((item) => (
-        <motion.div
-          key={item.label}
-          variants={itemVariants}
-          whileHover={{ scale: 1.05, y: -5 }}
-          className="bg-dark-bg-alt p-5 rounded-xl border border-accent-secondary hover:border-highlight-blue transition-all duration-300 cursor-pointer group"
-        >
-          <div className="flex items-center justify-between mb-2">
-            <i className={`fas ${item.icon} text-2xl ${item.color} group-hover:scale-110 transition-transform duration-300`}></i>
-            <i className="fab fa-github text-text-muted text-xl"></i>
-          </div>
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.5, type: "spring" }}
-            className={`text-3xl font-bold ${item.color} mb-1`}
-          >
-            {item.value}
-          </motion.div>
-          <div className="text-sm text-text-muted">{item.label}</div>
-        </motion.div>
-      ))}
-    </motion.div>
+    <Section eyebrow="Open source" title="GitHub activity" description="A compact view of public repository signals and profile activity." centered>
+      {error && (
+        <p className="mx-auto mb-6 max-w-xl rounded-lg border border-accent-primary/30 bg-accent-primary/10 p-4 text-sm text-accent-primary" role="status">
+          {error}
+        </p>
+      )}
+
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+        className="grid grid-cols-2 gap-4 md:grid-cols-4"
+      >
+        {statItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <motion.div
+              key={item.label}
+              variants={itemVariants}
+              whileHover={{ y: -4 }}
+              className="rounded-lg border border-white/10 bg-surface-raised/70 p-5 text-left shadow-lift transition hover:border-highlight-blue/50"
+            >
+              <div className="mb-4 flex items-center justify-between">
+                <Icon className={item.color} size={24} aria-hidden="true" />
+                <Code2 className="text-text-muted" size={20} aria-hidden="true" />
+              </div>
+              <div className={`mb-1 text-3xl font-semibold ${item.color}`}>{item.value}</div>
+              <div className="text-sm text-text-muted">{item.label}</div>
+            </motion.div>
+          );
+        })}
+      </motion.div>
+    </Section>
   );
 };
 

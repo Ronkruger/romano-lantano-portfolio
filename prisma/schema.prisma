@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  title         String
+  eyebrow       String
+  summary       String
+  description   String
+  imageUrl      String
+  imagePublicId String?
+  stack         String[]
+  role          String
+  timeframe     String
+  githubUrl     String
+  demoUrl       String?
+  demoAdminUrl  String?
+  problem       String
+  solution      String
+  highlights    String[]
+  outcome       String
+  accent        String
+  sortOrder     Int      @default(0)
+  featured      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([sortOrder, createdAt])
+}
+
+model SiteSettings {
+  id        String   @id @default("singleton")
+  name      String   @default("Romano Lantano")
+  title     String   @default("Full-stack web developer")
+  location  String   @default("Philippines")
+  email     String   @default("romanolantano.dev@gmail.com")
+  intro     String   @default("")
+  resumeUrl String?
+  resumePublicId String?
+  githubUrl String   @default("https://github.com/Ronkruger")
+  linkedinUrl String @default("https://www.linkedin.com/in/romano-lantano-418870234/")
+  facebookUrl String @default("https://www.facebook.com/R2sl1/")
+  updatedAt DateTime @updatedAt
+}

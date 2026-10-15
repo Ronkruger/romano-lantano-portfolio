@@ -1,141 +1,96 @@
-import React, { useState } from 'react';
+import { ArrowUpRight, Code2, ExternalLink } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import Section from './ui/Section';
+import { fetchProjects, type PublicProject } from '../api/projects';
 
-const projects = [
-  {
-    image: './images/dg.png',
-    title: 'Discover Group Travel Services',
-    description: 'A comprehensive travel booking platform with client-facing website and admin panel for managing tours, packages, and bookings.',
-    tech: 'React, Node.js, MongoDB, Express',
-    github: 'https://github.com/Ronkruger/discoverGroup',
-    demo: 'https://discoverg.netlify.app/',
-    demoAdmin: 'https://admindiscovergrp.netlify.app/',
-  },
-  {
-    image: './images/background-color-picker.png',
-    title: 'Background Color Picker',
-    description: 'An intuitive tool to select and visualize color codes for web design backgrounds.',
-    tech: 'HTML, CSS, JavaScript',
-    github: 'https://github.com/Ronkruger/background-color-picker',
-    demo: 'https://dainty-cassata-231695.netlify.app/',
-  },
-  {
-    image: './images/tip_calculator.png',
-    title: 'Tip Calculator',
-    description: 'A simple and efficient application to compute tip amounts and split bills easily.',
-    tech: 'HTML, CSS',
-    github: 'https://github.com/Ronkruger/tip-calculator-for-business',
-    demo: 'https://stellar-belekoy-0d4dde.netlify.app/',
-  },
-  {
-    image: './images/yt2mp3.png',
-    title: 'YouTube to MP3',
-    description: 'A fast and reliable tool to convert YouTube videos into MP3 audio format.',
-    tech: 'HTML, CSS, Vite',
-    github: 'https://github.com/Ronkruger/yt2mp3',
-    demo: 'https://fanciful-choux-59513a.netlify.app/?fbclid=IwY2xjawHsZBVleHRuA2FlcQIxMAABHaGboEt4IcXkMMjbhNzRCPAwhVYxXS-NMn5BSY9UT_oaF09G3d6EW77RQw_aem_Ew78kp8TJZf0sx6UkwsgVA',
-  },
-  {
-    image: './images/hotel.png',
-    title: 'Hotel Website',
-    description: 'A comprehensive hotel reservation platform with user registration and email confirmation features.',
-    tech: 'HTML, CSS, JavaScript, PHP, MySQL',
-    github: 'https://github.com/Ronkruger/hotel-website-w-email-registration',
-    demo: null,
-  },
-  {
-    image: './images/proshop.png',
-    title: 'Online Shop MERN Stack',
-    description: 'Your go-to online shop for gadgets – easy browse, secure checkout, and fast delivery right to your door.',
-    tech: 'React Js, NodeJS',
-    github: 'https://github.com/Ronkruger/shop-v2',
-    demo: 'https://proshop-3rqi.onrender.com/',
-  },
-];
+const Projects = () => {
+  const [projects, setProjects] = useState<PublicProject[]>([]);
+  const [loading, setLoading] = useState(true);
 
-const Projects: React.FC = () => {
-  const [hoveredProject, setHoveredProject] = useState<string | null>(null);
+  useEffect(() => {
+    const controller = new AbortController();
+
+    fetchProjects(controller.signal)
+      .then((nextProjects) => setProjects(nextProjects))
+      .catch(() => setProjects([]))
+      .finally(() => {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
+      });
+
+    return () => controller.abort();
+  }, []);
 
   return (
-    <section id="projects" className="py-20 bg-dark-bg-alt relative overflow-hidden">
-      <div className="w-[90%] max-w-7xl mx-auto px-5 relative z-10">
-        <div className="relative inline-block mx-auto text-center pb-5 w-full">
-          <h2 
-            className="text-5xl md:text-6xl mb-10 relative text-highlight-blue text-center shadow-[0_0_10px_rgba(0,188,212,0.4)] font-bold uppercase tracking-wider"
-            data-aos="fade-up"
-          >
-            Projects
-          </h2>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-          {projects.map((project, index) => (
-            <div
-              key={project.title}
-              className="bg-dark-bg rounded-xl shadow-[0_4px_15px_rgba(0,0,0,0.3)] border border-accent-secondary overflow-hidden flex flex-col relative transition-all duration-300 group hover:-translate-y-1 hover:shadow-[0_8px_25px_rgba(0,0,0,0.5),0_0_15px_rgba(233,69,96,0.4)] hover:border-accent-primary"
-              data-aos="fade-up" 
-              data-aos-delay={100 + index * 100}
-              onMouseEnter={() => setHoveredProject(project.title)}
-              onMouseLeave={() => setHoveredProject(null)}
-            >
-              {/* Subtle pattern on hover */}
-              <div className="absolute inset-0 bg-[repeating-linear-gradient(45deg,rgba(57,255,20,0.03),rgba(57,255,20,0.03)_2px,transparent_2px,transparent_10px)] opacity-0 transition-opacity duration-300 z-0 group-hover:opacity-10"></div>
-              
-              <div className="relative overflow-hidden">
-                <img 
-                  src={project.image} 
-                  alt={project.title} 
-                  className="w-full h-48 object-cover border-b border-accent-secondary transition-transform duration-500 relative z-10 group-hover:scale-110"
-                />
-                {/* Interactive overlay */}
-                <div className={`absolute inset-0 bg-gradient-to-t from-dark-bg via-dark-bg/80 to-transparent flex items-center justify-center transition-opacity duration-300 z-20 ${hoveredProject === project.title ? 'opacity-100' : 'opacity-0'}`}>
-                  <div className="text-center transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                    <i className="fas fa-eye text-4xl text-highlight-blue mb-2 animate-pulse"></i>
-                    <p className="text-text-light font-semibold">View Details</p>
-                  </div>
-                </div>
-              </div>
-              <div className="p-5 flex flex-col flex-grow relative z-10">
-                <h3 className="text-2xl text-highlight-blue mb-2 font-semibold">{project.title}</h3>
-                <p className="text-sm text-text-muted mb-4 flex-grow">{project.description}</p>
-                <p className="text-xs text-highlight-green font-code mt-auto drop-shadow-[0_0_5px_rgba(57,255,20,0.3)]">
-                  Technologies: {project.tech}
-                </p>
-                <div className="flex flex-wrap gap-4 mt-5">
-                  <a 
-                    href={project.github} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="inline-block px-6 py-3 rounded-md no-underline font-semibold text-sm my-0 mr-4 transition-all duration-300 border-2 uppercase tracking-wide relative overflow-hidden z-10 bg-accent-primary text-white border-accent-primary shadow-[0_0_8px_rgba(233,69,96,0.4)] hover:bg-transparent hover:text-accent-primary hover:shadow-[0_0_20px_rgba(233,69,96,0.8)] hover:-translate-y-0.5"
-                  >
-                    Source Code
-                  </a>
-                  {project.demo && (
-                    <a 
-                      href={project.demo} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="inline-block px-6 py-3 rounded-md no-underline font-semibold text-sm my-0 mr-4 transition-all duration-300 border-2 uppercase tracking-wide relative overflow-hidden z-10 bg-transparent text-highlight-blue border-highlight-blue shadow-[0_0_8px_rgba(0,188,212,0.4)] hover:bg-highlight-blue hover:text-dark-bg hover:shadow-[0_0_20px_rgba(0,188,212,0.8)] hover:-translate-y-0.5"
-                    >
-                      Live Demo
-                    </a>
-                  )}
-                  {project.demoAdmin && (
-                    <a 
-                      href={project.demoAdmin} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="inline-block px-6 py-3 rounded-md no-underline font-semibold text-sm my-0 transition-all duration-300 border-2 uppercase tracking-wide relative overflow-hidden z-10 bg-transparent text-highlight-green border-highlight-green shadow-[0_0_8px_rgba(57,255,20,0.4)] hover:bg-highlight-green hover:text-dark-bg hover:shadow-[0_0_20px_rgba(57,255,20,0.8)] hover:-translate-y-0.5"
-                    >
-                      Admin Panel
-                    </a>
-                  )}
-                </div>
-              </div>
-            </div>
+    <Section
+      id="projects"
+      eyebrow="Selected work"
+      title="Projects with real workflows behind the interface."
+      description="Each project now links to a case-study route so the portfolio can tell a stronger story than a grid of screenshots."
+      muted
+    >
+      {loading && (
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3" aria-label="Loading projects">
+          {[0, 1, 2].map((item) => (
+            <div key={item} className="h-96 animate-pulse rounded-lg border border-white/10 bg-surface-raised/60" />
           ))}
         </div>
+      )}
+
+      {!loading && projects.length === 0 && (
+        <div className="rounded-lg border border-white/10 bg-surface-raised/60 p-6 text-text-muted">
+          Projects are being updated.
+        </div>
+      )}
+
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        {!loading && projects.map((project) => (
+          <article key={project.slug} className="group flex h-full flex-col overflow-hidden rounded-lg border border-white/10 bg-surface-raised/70 shadow-editorial transition hover:-translate-y-1 hover:border-accent-primary/50">
+            <Link to={`/projects/${project.slug}`} className="block focus:outline-none focus:ring-2 focus:ring-accent-primary/70">
+              <div className="relative overflow-hidden">
+                <img src={project.image} alt={`${project.title} preview`} loading="lazy" className="aspect-[16/10] w-full object-cover transition duration-500 group-hover:scale-105" />
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-dark-bg/90 to-transparent p-4">
+                  <span className="rounded-full border border-white/15 bg-dark-bg/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-accent-primary">
+                    {project.eyebrow}
+                  </span>
+                </div>
+              </div>
+            </Link>
+
+            <div className="flex flex-1 flex-col p-5">
+              <h3 className="text-2xl font-semibold leading-tight text-text-light">{project.title}</h3>
+              <p className="mt-3 flex-1 text-sm leading-7 text-text-muted">{project.summary}</p>
+              <div className="mt-5 flex flex-wrap gap-2">
+                {project.stack.slice(0, 4).map((tech) => (
+                  <span key={tech} className="rounded-full border border-white/10 px-3 py-1 text-xs text-text-muted">
+                    {tech}
+                  </span>
+                ))}
+              </div>
+
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link to={`/projects/${project.slug}`} className="inline-flex min-h-11 items-center gap-2 rounded-md bg-accent-primary px-4 py-2 text-sm font-semibold text-dark-bg transition hover:bg-link-hover focus:outline-none focus:ring-2 focus:ring-accent-primary/70">
+                  Case study
+                  <ArrowUpRight size={17} aria-hidden="true" />
+                </Link>
+                <a href={project.links.github} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-md border border-white/15 px-4 py-2 text-sm font-semibold text-text-light transition hover:border-highlight-blue/70 hover:text-highlight-blue focus:outline-none focus:ring-2 focus:ring-highlight-blue/70">
+                  <Code2 size={17} aria-hidden="true" />
+                  Source
+                </a>
+                {project.links.demo && (
+                  <a href={project.links.demo} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-md border border-white/15 px-4 py-2 text-sm font-semibold text-text-light transition hover:border-highlight-blue/70 hover:text-highlight-blue focus:outline-none focus:ring-2 focus:ring-highlight-blue/70">
+                    <ExternalLink size={17} aria-hidden="true" />
+                    Live
+                  </a>
+                )}
+              </div>
+            </div>
+          </article>
+        ))}
       </div>
-    </section>
+    </Section>
   );
 };
 

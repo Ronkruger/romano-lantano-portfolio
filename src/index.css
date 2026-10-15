@@ -3,15 +3,32 @@
 @tailwind utilities;
 
 @layer base {
+  * {
+    box-sizing: border-box;
+  }
+
   body {
     @apply font-primary leading-relaxed text-text-light bg-dark-bg overflow-x-hidden;
-    background-image: linear-gradient(90deg, rgba(255, 255, 255, .05) 1px, transparent 1px),
-                      linear-gradient(rgba(255, 255, 255, .05) 1px, transparent 1px);
-    background-size: 30px 30px;
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 38%),
+                      linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+                      linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 100% 100%, 36px 36px, 36px 36px;
   }
 
   html {
     @apply scroll-smooth;
+  }
+
+  ::selection {
+    @apply bg-accent-primary text-dark-bg;
+  }
+
+  a {
+    text-decoration: none;
+  }
+
+  img {
+    max-width: 100%;
   }
 }
 
@@ -54,6 +71,15 @@
 
   ::-webkit-scrollbar-thumb:hover {
     @apply bg-highlight-blue;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
